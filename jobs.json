@@ -1,0 +1,1671 @@
+[
+    {
+        "company": "Siemens",
+        "role": "Trainee",
+        "job_id": "526122",
+        "category": "Finance & Procurement Operations",
+        "description": "Support master-data operations involving creation, verification and modification of customer and vendor records.",
+        "responsibilities": [
+            "Maintain customer and vendor master data",
+            "Verify incoming requests",
+            "Process third-party and intra-company records"
+        ],
+        "required_skills": [
+            "Attention to detail",
+            "Data accuracy",
+            "Process compliance"
+        ],
+        "preferred_skills": [],
+        "education": [
+            "Bachelor's degree"
+        ],
+        "experience_min_years": 0,
+        "experience_max_years": 0,
+        "graduation_years": [],
+        "location": [
+            "Bengaluru, Karnataka, India"
+        ],
+        "employment_type": "Full-time",
+        "work_model": "On-site",
+        "salary": null,
+        "currency": "INR",
+        "deadline": null,
+        "apply_url": "https://jobs.siemens.com/en_US/externaljobs/JobDetail/526122?ste_sid=292832604ad78bbf683cdcffb47886f9",
+        "eligibility_status": "Verify exact degree requirements on employer page",
+        "verification_status": "Job ID and role details corroborated by available listing"
+    },
+    {
+        "company": "Barclays",
+        "role": "Software Engineer",
+        "job_id": "JR-0000120497",
+        "category": "Software Engineering / Infrastructure Automation",
+        "description": "Develop and maintain software, infrastructure deployment pipelines and automation workflows.",
+        "responsibilities": [
+            "Develop Python automation",
+            "Integrate REST APIs",
+            "Support CI/CD pipelines",
+            "Maintain enterprise BI platforms",
+            "Monitor systems and resolve issues"
+        ],
+        "required_skills": [
+            "Python",
+            "REST APIs",
+            "JSON",
+            "Git",
+            "CI/CD",
+            "Linux",
+            "Automation"
+        ],
+        "preferred_skills": [
+            "Tableau",
+            "Power BI",
+            "AWS",
+            "ServiceNow",
+            "Jira"
+        ],
+        "education": [],
+        "experience_min_years": null,
+        "experience_max_years": null,
+        "graduation_years": [],
+        "location": [
+            "Pune, Maharashtra, India"
+        ],
+        "employment_type": "Permanent",
+        "work_model": null,
+        "salary": null,
+        "salary_claim_from_source": "12 LPA supplied by user; not verified on official page",
+        "deadline": null,
+        "apply_url": "https://search.jobs.barclays/job/pune/software-engineer/13015/99013663152",
+        "eligibility_status": "Review experience expectations; graduation-year restriction unconfirmed",
+        "verification_status": "Official listing found"
+    },
+    {
+        "company": "Mouser Electronics",
+        "role": "Web Developer",
+        "job_id": "30697",
+        "category": "Web Development",
+        "description": "Develop and maintain web and back-office applications, implement UI features, work with databases and support e-commerce systems.",
+        "responsibilities": [
+            "Implement web application features",
+            "Write and test code",
+            "Work with SQL databases",
+            "Maintain existing applications",
+            "Document technical changes"
+        ],
+        "required_skills": [
+            "C#",
+            "ASP.NET",
+            "SQL Server",
+            "JavaScript",
+            "Web development"
+        ],
+        "preferred_skills": [
+            "MVC",
+            ".NET",
+            "jQuery",
+            "Bootstrap",
+            "JSON",
+            "AJAX"
+        ],
+        "education": [
+            "Bachelor's degree in a technical field"
+        ],
+        "experience_min_years": null,
+        "experience_max_years": null,
+        "graduation_years": [],
+        "location": [
+            "Bengaluru, Karnataka, India"
+        ],
+        "employment_type": "Full-time",
+        "work_model": "Hybrid",
+        "shift_start": "11:00",
+        "shift_end": "20:00",
+        "timezone": "Asia/Kolkata",
+        "salary": null,
+        "deadline": null,
+        "apply_url": "https://eabw.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/30697?utm_medium=jobboard&utm_source=linkedin",
+        "eligibility_status": "Verify current requirements on employer portal",
+        "verification_status": "Role details supplemented by third-party listings"
+    },
+    {
+        "company": "DP World",
+        "role": "Machine Learning Scientist",
+        "job_id": "15097",
+        "category": "Artificial Intelligence / Machine Learning",
+        "description": "Machine learning role associated with applying predictive and optimization techniques to business problems.",
+        "responsibilities": [
+            "Develop and evaluate ML models",
+            "Analyze data",
+            "Build predictive solutions",
+            "Support model validation and deployment"
+        ],
+        "required_skills": [
+            "Machine learning",
+            "Python",
+            "Data analysis"
+        ],
+        "preferred_skills": [
+            "Optimization",
+            "Predictive modelling",
+            "Reinforcement learning"
+        ],
+        "education": [
+            "Bachelor's degree, as supplied; exact accepted disciplines require confirmation"
+        ],
+        "experience_min_years": 0,
+        "experience_max_years": 5,
+        "graduation_years": [],
+        "location": [
+            "Bengaluru, Karnataka, India"
+        ],
+        "employment_type": "Full-time",
+        "work_model": null,
+        "salary": null,
+        "salary_estimate": null,
+        "deadline": null,
+        "apply_url": "https://ehpv.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/15097",
+        "eligibility_status": "Verify job availability and full requirements",
+        "verification_status": "Role details partly supported by third-party listing; official detail page not independently confirmed"
+    },
+    {
+        "company": "Altera",
+        "role": "Associate Systems Engineer",
+        "job_id": "R0047048",
+        "category": "Systems Support / IT Operations",
+        "description": "Monitor and maintain application and infrastructure availability, troubleshoot incidents and support operational reliability.",
+        "responsibilities": [
+            "Monitor application performance",
+            "Troubleshoot SQL databases",
+            "Support Windows Server and IIS",
+            "Handle incidents and escalations",
+            "Document root causes"
+        ],
+        "required_skills": [
+            "SQL",
+            "Systems monitoring",
+            "Troubleshooting",
+            "Windows Server",
+            "Incident management"
+        ],
+        "preferred_skills": [
+            "AppDynamics",
+            "LogicMonitor",
+            "Azure Monitor",
+            "IIS",
+            "ITIL"
+        ],
+        "education": [
+            "Bachelor's degree in Computer Science, IT or related field, or equivalent experience"
+        ],
+        "experience_min_years": 1,
+        "experience_max_years": 3,
+        "graduation_years": [],
+        "location": [
+            "Remote / Pune / Baroda, India"
+        ],
+        "employment_type": "Full-time",
+        "work_model": "Remote option listed; confirm exact arrangement",
+        "salary": null,
+        "deadline": null,
+        "apply_url": "https://harriscomputer.wd3.myworkdayjobs.com/en-US/Altera/job/Associate-Systems-Engineer_R0047048",
+        "eligibility_status": "Not a confirmed fresher-only role",
+        "verification_status": "Official employer listing found"
+    },
+    {
+        "company": "GE Vernova",
+        "role": "Engineer - Systems Engineering",
+        "job_id": "R5054073",
+        "category": "Systems Engineering / Validation",
+        "description": "Execute laboratory and field validation testing, inspection and data acquisition for product and system validation.",
+        "responsibilities": [
+            "Conduct validation testing",
+            "Collect technical data",
+            "Support test-facility instrumentation",
+            "Document test activities",
+            "Coordinate technical improvements"
+        ],
+        "required_skills": [
+            "Technical problem-solving",
+            "Testing",
+            "Documentation",
+            "Communication"
+        ],
+        "preferred_skills": [
+            "Instrumentation",
+            "Systems validation",
+            "Test execution"
+        ],
+        "education": [],
+        "experience_min_years": 0,
+        "experience_max_years": null,
+        "graduation_years": [],
+        "location": [
+            "Pallavaram, Tamil Nadu, India"
+        ],
+        "employment_type": "Full-time",
+        "work_model": null,
+        "salary": null,
+        "deadline": null,
+        "apply_url": "https://careers.gevernova.com/engineer-systems-engineering/job/R5054073",
+        "eligibility_status": "Verify the exact degree and experience requirements",
+        "verification_status": "Official listing found; fresher status not conclusively confirmed"
+    },
+    {
+        "company": "Amazon",
+        "role": "Software Dev Engineer I",
+        "job_id": "10454438",
+        "category": "Software Engineering",
+        "description": "Design, build and maintain scalable software systems and distributed technologies.",
+        "responsibilities": [
+            "Develop software features",
+            "Build distributed systems",
+            "Work with storage and query systems",
+            "Collaborate with cross-functional engineering teams"
+        ],
+        "required_skills": [
+            "Programming",
+            "Data structures",
+            "Algorithms",
+            "Problem-solving"
+        ],
+        "preferred_skills": [
+            "Technical internships",
+            "Distributed systems",
+            "Relational databases",
+            "Optimization"
+        ],
+        "education": [
+            "Bachelor's degree or above in Computer Science, Computer Engineering or a related field"
+        ],
+        "experience_min_years": null,
+        "experience_max_years": null,
+        "graduation_years": [
+            2026
+        ],
+        "location": [
+            "Bengaluru",
+            "Hyderabad",
+            "Chennai"
+        ],
+        "employment_type": "Full-time",
+        "work_model": null,
+        "salary": null,
+        "deadline": null,
+        "apply_url": "https://www.amazon.jobs/en/jobs/10454438/software-dev-engineer-i-amazon-university-talent-acquisition",
+        "eligibility_status": "2026 graduating students explicitly specified",
+        "verification_status": "Official listing found"
+    },
+    {
+        "company": "Cognizant",
+        "role": "Data Analyst",
+        "job_id": "00070260513",
+        "category": "Data Analytics / Generative AI",
+        "description": "Build analytical data pipelines and GenAI-powered workflows for enterprise decision-making.",
+        "responsibilities": [
+            "Collect and transform datasets",
+            "Build Python data pipelines",
+            "Develop LLM workflows",
+            "Create LangGraph workflows",
+            "Integrate data sources",
+            "Monitor analytical quality"
+        ],
+        "required_skills": [
+            "Advanced Python",
+            "Data manipulation",
+            "LLM fundamentals",
+            "LangChain",
+            "LangGraph",
+            "MCP"
+        ],
+        "preferred_skills": [
+            "Data visualization",
+            "Pipeline optimization",
+            "AI evaluation"
+        ],
+        "education": [],
+        "experience_min_years": null,
+        "experience_max_years": null,
+        "graduation_years": [],
+        "location": [
+            "Chennai, Tamil Nadu, India"
+        ],
+        "employment_type": null,
+        "work_model": "Hybrid",
+        "salary": null,
+        "deadline": null,
+        "apply_url": "https://careers.cognizant.com/global-en/jobs/00070260513/data-analyst/",
+        "eligibility_status": "Experience requirements need careful review; listing mentions 12 years of progressive analytics experience",
+        "verification_status": "Official listing found; not suitable to label as fresher by default"
+    },
+    {
+        "company": "IDFC FIRST Bank",
+        "role": "Associate Manager - Acquisition (Household)",
+        "job_id": "P-232683",
+        "category": "Banking / Sales / Customer Acquisition",
+        "description": "Acquire new savings-account customers and support household banking relationships.",
+        "responsibilities": [
+            "Acquire customers",
+            "Explain banking products",
+            "Support account-opening processes",
+            "Build customer relationships"
+        ],
+        "required_skills": [
+            "Communication",
+            "Customer acquisition",
+            "Sales",
+            "Relationship management"
+        ],
+        "preferred_skills": [
+            "Banking products",
+            "Retail banking experience"
+        ],
+        "education": [
+            "Bachelor's degree in any discipline"
+        ],
+        "experience_min_years": 0,
+        "experience_max_years": 4,
+        "graduation_years": [],
+        "location": [
+            "Pune, Maharashtra, India"
+        ],
+        "employment_type": null,
+        "work_model": null,
+        "salary": null,
+        "deadline": null,
+        "apply_url": "https://careers.idfcfirst.bank.in/in/en/job/P-232683/Associate-Manager-Acquisition-Household",
+        "eligibility_status": "Verify the live requisition and exact location",
+        "verification_status": "Role details supported by available employer search result"
+    },
+    {
+        "company": "Deloitte",
+        "role": "BTA - Business Solution Analyst",
+        "job_id": "371627",
+        "category": "Business Analysis / Technology Support",
+        "description": "Support business applications, manual testing, research and updates involving global employer-services technology.",
+        "responsibilities": [
+            "Perform manual testing",
+            "Maintain business applications",
+            "Research application and legislative changes",
+            "Use Excel and AI tools",
+            "Communicate updates to stakeholders"
+        ],
+        "required_skills": [
+            "Analytical thinking",
+            "Organization",
+            "Communication",
+            "Excel"
+        ],
+        "preferred_skills": [
+            "Application testing",
+            "Business analysis",
+            "AI-assisted research"
+        ],
+        "education": [
+            "BBA",
+            "B.Com",
+            "B.Tech",
+            "B.E.",
+            "BCA",
+            "B.Sc. in an accepted discipline"
+        ],
+        "experience_min_years": null,
+        "experience_max_years": null,
+        "graduation_years": [],
+        "location": [
+            "Hyderabad, Telangana, India"
+        ],
+        "employment_type": "Full-time",
+        "work_model": null,
+        "shift_start": "11:00",
+        "shift_end": "20:00",
+        "timezone": "Asia/Kolkata",
+        "salary": null,
+        "deadline": null,
+        "apply_url": "https://usijobs.deloitte.com/en_US/careersUSI/JobDetail/USI-EH27-Tax-GESTC-Business-Solution-Analyst-L25-BTA-Hyderabad/371627",
+        "eligibility_status": "Business and technology graduates may be eligible; confirm current opening",
+        "verification_status": "Role details corroborated by available job description"
+    },
+    {
+        "company": "Monotype",
+        "role": "Information Security Trainee",
+        "job_id": "R0004875",
+        "category": "Cybersecurity / Information Security",
+        "description": "Assist with security investigations, threat analysis, incident response, malware remediation and security monitoring.",
+        "responsibilities": [
+            "Analyze threat intelligence",
+            "Investigate vulnerabilities",
+            "Support incident response",
+            "Assist with malware remediation",
+            "Audit network and operating-system configurations"
+        ],
+        "required_skills": [
+            "Information security fundamentals",
+            "Analytical thinking",
+            "Technical communication"
+        ],
+        "preferred_skills": [
+            "AWS security",
+            "Network security",
+            "Cloud security",
+            "Incident response"
+        ],
+        "education": [
+            "Bachelor's degree in Computer Science, IT, Information Security or equivalent"
+        ],
+        "experience_min_years": 0,
+        "experience_max_years": null,
+        "graduation_years": [],
+        "location": [
+            "Noida, Uttar Pradesh, India"
+        ],
+        "employment_type": "Full-time",
+        "work_model": null,
+        "salary": null,
+        "deadline": "2026-10-30",
+        "apply_url": "https://monotype.wd1.myworkdayjobs.com/en-US/Monotype/job/Information-Security-Trainee_R0004875",
+        "eligibility_status": "Entry-level applicants considered",
+        "verification_status": "Official listing found; deadline shown as October 30, 2026"
+    },
+    {
+        "company": "Larsen & Toubro",
+        "role": "GenAI Trainee",
+        "job_id": "LNT_GT_1820562",
+        "category": "Generative AI / Machine Learning",
+        "description": "The supplied listing describes a trainee opportunity focused on AI and machine learning. Exact duties for this requisition require confirmation.",
+        "responsibilities": [
+            "To be confirmed from the exact requisition"
+        ],
+        "required_skills": [
+            "Artificial Intelligence",
+            "Machine Learning"
+        ],
+        "preferred_skills": [
+            "Python",
+            "LLMs",
+            "Prompt engineering",
+            "RAG"
+        ],
+        "education": [
+            "B.Tech"
+        ],
+        "experience_min_years": 0,
+        "experience_max_years": 2,
+        "graduation_years": [],
+        "location": [
+            "Powai, Mumbai, Maharashtra, India"
+        ],
+        "employment_type": null,
+        "work_model": null,
+        "salary": null,
+        "deadline": "2027-02-09",
+        "apply_url": "https://larsentoubrocareers.peoplestrong.com/job/detail/LNT_GT_1820562?Source=Linkedin",
+        "eligibility_status": "Verify the exact job ID, deadline and requirements before publishing",
+        "verification_status": "Exact requisition details not independently confirmed"
+    },
+    {
+        "company": "Hewlett Packard Enterprise",
+        "role": "College Intern",
+        "job_id": "1211843",
+        "category": "Technology Internship",
+        "description": "Support technical projects, troubleshooting, systems maintenance and collaborative engineering work.",
+        "responsibilities": [
+            "Support senior engineers",
+            "Troubleshoot technical issues",
+            "Maintain hardware and software",
+            "Participate in team projects",
+            "Learn development practices"
+        ],
+        "required_skills": [
+            "Basic programming or scripting",
+            "Problem-solving",
+            "Communication"
+        ],
+        "preferred_skills": [
+            "Python",
+            "Java",
+            "C++",
+            "Technical project experience"
+        ],
+        "education": [
+            "Currently pursuing a Bachelor's degree in Engineering, Computer Science, IT or a related technical field"
+        ],
+        "experience_min_years": null,
+        "experience_max_years": null,
+        "graduation_years": [],
+        "location": [
+            "Bengaluru, Karnataka, India"
+        ],
+        "employment_type": "Full-time internship",
+        "work_model": "Remote / Teleworker designation",
+        "salary": null,
+        "deadline": null,
+        "apply_url": "https://careers.hpe.com/us/en/job/1211843/College-Intern",
+        "eligibility_status": "Current students in relevant technical degrees",
+        "verification_status": "Official listing found; confirm availability and location terms"
+    },
+    {
+        "company": "Priceline",
+        "role": "Associate Software Engineer",
+        "job_id": "R5880",
+        "category": "Software Engineering",
+        "description": "Develop, test, optimize and automate reliable software services within a product engineering team.",
+        "responsibilities": [
+            "Build software features",
+            "Write maintainable code",
+            "Implement automated tests",
+            "Work with SQL data",
+            "Collaborate with product and architecture teams"
+        ],
+        "required_skills": [
+            "Java",
+            "SQL",
+            "Spring Boot",
+            "REST APIs",
+            "Microservices"
+        ],
+        "preferred_skills": [
+            "Test-driven development",
+            "CI/CD",
+            "Automation testing"
+        ],
+        "education": [
+            "Bachelor's degree or higher in Computer Science or a related field"
+        ],
+        "experience_min_years": 2,
+        "experience_max_years": null,
+        "graduation_years": [],
+        "location": [
+            "Mumbai, Maharashtra, India"
+        ],
+        "employment_type": "Full-time",
+        "work_model": "Hybrid; two days in-office",
+        "salary": null,
+        "deadline": null,
+        "apply_url": "https://priceline.wd1.myworkdayjobs.com/en-US/Priceline/job/Associate-Software-Engineer_R5880",
+        "eligibility_status": "Requires two years of software development experience",
+        "verification_status": "Official listing found"
+    },
+    {
+        "company": "American Express",
+        "role": "Apprentice - Enterprise Technology Services",
+        "job_id": "26009713",
+        "category": "Technology Apprenticeship",
+        "description": "A 12-month paid apprenticeship involving software development, API work, testing and automation.",
+        "responsibilities": [
+            "Write code",
+            "Contribute to agile development",
+            "Review and test APIs",
+            "Build applications and automation tools"
+        ],
+        "required_skills": [
+            "Programming fundamentals",
+            "Problem-solving",
+            "Willingness to learn"
+        ],
+        "preferred_skills": [
+            "Java",
+            "JavaScript",
+            ".NET",
+            "Python",
+            "API development"
+        ],
+        "education": [
+            "Completed Bachelor's or Master's degree in Computer Science, IT, Engineering or another technical discipline"
+        ],
+        "experience_min_years": null,
+        "experience_max_years": null,
+        "graduation_years": [],
+        "location": [
+            "Bengaluru",
+            "Gurugram",
+            "Chennai"
+        ],
+        "employment_type": "Full-time apprenticeship",
+        "work_model": "Hybrid",
+        "salary": null,
+        "deadline": "2026-10-16",
+        "apply_url": "https://egug.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/26009713",
+        "eligibility_status": "Deadline has passed; confirm whether the requisition has reopened",
+        "verification_status": "Official listing found; listed deadline was October 16, 2026"
+    },
+    {
+        "company": "Atlassian",
+        "role": "Software Engineer",
+        "job_id": "REQ-2026-2466",
+        "category": "Cloud Infrastructure / Platform Engineering",
+        "description": "Build and scale Kubernetes-based infrastructure and cloud platform services.",
+        "responsibilities": [
+            "Develop Kubernetes control-plane components",
+            "Support multi-cloud infrastructure",
+            "Improve platform reliability",
+            "Contribute to scalable infrastructure architecture"
+        ],
+        "required_skills": [
+            "Kubernetes",
+            "Cloud infrastructure",
+            "Platform engineering",
+            "Core engineering principles"
+        ],
+        "preferred_skills": [
+            "AWS",
+            "GCP",
+            "CI/CD",
+            "Distributed systems"
+        ],
+        "education": [],
+        "experience_min_years": null,
+        "experience_max_years": null,
+        "graduation_years": [],
+        "location": [],
+        "employment_type": null,
+        "work_model": null,
+        "salary": null,
+        "deadline": null,
+        "apply_url": "https://careers-apac-atlassian.icims.com/jobs/26758/software-engineer/job",
+        "eligibility_status": "Confirm location and experience requirements on the live page",
+        "verification_status": "Official listing found; not confirmed as fresher-specific"
+    },
+    {
+        "company": "Walmart",
+        "role": "Software Engineer II",
+        "job_id": "R-2533616",
+        "category": "Software Engineering / AI and Cloud",
+        "description": "Build scalable software systems and contribute to engineering projects across retail, cloud, data and AI/ML.",
+        "responsibilities": [
+            "Design and deploy software",
+            "Collaborate with product and data teams",
+            "Participate in code reviews",
+            "Develop scalable systems"
+        ],
+        "required_skills": [
+            "Python or Java or C++ or JavaScript",
+            "Data structures",
+            "Algorithms",
+            "System design fundamentals"
+        ],
+        "preferred_skills": [
+            "Cloud infrastructure",
+            "AI/ML",
+            "Hadoop",
+            "Cassandra"
+        ],
+        "education": [
+            "Final-year Computer Science, Software Engineering or related students, subject to the programme's specific eligibility conditions"
+        ],
+        "experience_min_years": 0,
+        "experience_max_years": null,
+        "graduation_years": [
+            2026
+        ],
+        "location": [
+            "Bengaluru / Chennai, India"
+        ],
+        "employment_type": "Full-time",
+        "work_model": null,
+        "salary": null,
+        "deadline": null,
+        "apply_url": "https://walmart.wd504.myworkdayjobs.com/en-US/WalmartExternal/job/XMLNAME--IND--Software-Engineer-II_R-2533616",
+        "eligibility_status": "Critical restriction: listing specifies Indian nationals enrolled at US universities",
+        "verification_status": "Official listing found; target-candidate restrictions must be checked"
+    },
+    {
+        "company": "PwC",
+        "role": "Technology Consulting Intern - 2027",
+        "job_id": "758969WD",
+        "category": "Technology Consulting",
+        "description": "Consulting internship associated with technology, analytics and advisory projects.",
+        "responsibilities": [
+            "Support consulting projects",
+            "Research business and technology problems",
+            "Assist with analysis and documentation",
+            "Collaborate with project teams"
+        ],
+        "required_skills": [
+            "Analytical thinking",
+            "Communication",
+            "Problem-solving"
+        ],
+        "preferred_skills": [
+            "Data analytics",
+            "Technology research",
+            "Presentation skills"
+        ],
+        "education": [
+            "Final-year Bachelor's or Master's student; verify exact programme criteria"
+        ],
+        "experience_min_years": null,
+        "experience_max_years": null,
+        "graduation_years": [
+            2027
+        ],
+        "location": [
+            "Bengaluru / Telangana; verify exact office location"
+        ],
+        "employment_type": "Internship",
+        "work_model": null,
+        "salary": null,
+        "stipend_claim_from_source": "₹30,000 per month supplied by user; not independently verified",
+        "deadline": null,
+        "apply_url": "https://jobs-ta.pwc.com/global/en/job/758969WD/Technology-Consulting-Intern-2027",
+        "eligibility_status": "Verify eligible graduation batch and office location",
+        "verification_status": "Third-party summary found; exact official details should be rechecked"
+    }
+]
+
+
+
+
+
+{
+    "schema_version": "1.0",
+    "source": "SDE Jobs and Internships referral alerts",
+    "checked_on": "2026-10-26",
+    "notice": "Compensation, batches and openings are source claims unless independently corroborated.",
+    "jobs": [
+        {
+            "company": "Cnvrted",
+            "role": "Software Backend Engineer Intern",
+            "category": "Backend Engineering",
+            "graduation_years": [
+                2026,
+                2027,
+                2028
+            ],
+            "stipend": {
+                "min": 25000,
+                "max": 25000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Bengaluru, India",
+            "work_model": "In-person several days per week; confirm exact arrangement",
+            "required_skills": [
+                "Backend development",
+                "APIs",
+                "Databases",
+                "Server-side programming",
+                "Async processing",
+                "Background jobs",
+                "Queues",
+                "Concurrency",
+                "Timeouts",
+                "Retries",
+                "Error handling",
+                "Idempotency",
+                "Database optimization",
+                "Performance debugging",
+                "Scalable systems",
+                "AI agents",
+                "Third-party API integrations",
+                "Troubleshooting"
+            ],
+            "application_url": "https://docs.google.com/forms/d/e/1FAIpQLSfr_88vYF7bUefW_KsMevV5XOT6G9aq93-32j6WALV69LAUvg/viewform",
+            "application_link_type": "Referral form",
+            "verification_status": "PARTIALLY_VERIFIED",
+            "verification_note": "Role and compensation corroborated by a job listing; confirm form availability."
+        },
+        {
+            "company": "Groww",
+            "role": "HR Analytics Intern",
+            "category": "People Analytics",
+            "graduation_years": [
+                2025,
+                2026,
+                2027
+            ],
+            "duration_months": 6,
+            "stipend": {
+                "min": 35000,
+                "max": 40000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Bengaluru, India",
+            "required_skills": [
+                "Excel or Google Sheets",
+                "Analytical thinking",
+                "Problem-solving",
+                "Attention to detail"
+            ],
+            "preferred_skills": [
+                "SQL",
+                "Python"
+            ],
+            "application_url": "https://docs.google.com/forms/d/e/1FAIpQLScl2vDq-OZ-WZJrkCV2lyzxCxTHKxbhU1-WKaxA7Qfz3zsgOg/viewform",
+            "application_link_type": "Referral form",
+            "verification_status": "DISCREPANCY",
+            "verification_note": "Similar listing reports 3 months and approximately INR 37000/month; supplied 6-month duration needs confirmation."
+        },
+        {
+            "company": "Accenture",
+            "role": "Analyst",
+            "category": "Operations / Analyst",
+            "graduation_years": [
+                2024,
+                2025,
+                2026
+            ],
+            "salary_claim": {
+                "min": 35000,
+                "max": 60000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Airoli, Navi Mumbai, India",
+            "eligibility": [
+                "Completed degree",
+                "Fresh graduates"
+            ],
+            "required_skills": [
+                "Communication"
+            ],
+            "recruiter_email": "nikita.d.soni@accenture.com",
+            "application_url": null,
+            "application_link_type": "Recruiter email",
+            "verification_status": "PARTIALLY_VERIFIED",
+            "verification_note": "Similar recruiter listings found, but the exact analyst requisition and salary are unconfirmed."
+        },
+        {
+            "company": "Kiwi",
+            "role": "AI Engineer",
+            "category": "Artificial Intelligence",
+            "graduation_years": [
+                2024,
+                2025,
+                2026
+            ],
+            "ctc_claim": {
+                "min": 1500000,
+                "max": 2500000,
+                "currency": "INR",
+                "period": "year"
+            },
+            "location": "Bengaluru, India",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7519773838482640896",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED",
+            "verification_note": "Exact requisition and compensation not independently confirmed."
+        },
+        {
+            "company": "Ridecell",
+            "role": "Software Engineering Intern",
+            "category": "Software Engineering",
+            "graduation_years": [
+                2025,
+                2026,
+                2027
+            ],
+            "stipend": {
+                "min": 30000,
+                "max": 30000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Pune, India",
+            "employment_type": "Internship",
+            "ppo_claim": true,
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7519773838482640896",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "DISCREPANCY",
+            "verification_note": "A similar listing reports INR 25000-30000/month and indicates the vacancy expired; confirm reopening."
+        },
+        {
+            "company": "SculptSoft",
+            "role": "Data Analyst",
+            "category": "Data Analytics",
+            "graduation_years": [
+                2025,
+                2026,
+                2027
+            ],
+            "salary_claim": {
+                "min": 25000,
+                "max": 30000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Ahmedabad, India",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7519773838482640896",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "Credgenics",
+            "role": "Software Intern",
+            "category": "Software Engineering",
+            "graduation_years": [
+                2026,
+                2027,
+                2028
+            ],
+            "stipend": {
+                "min": 25000,
+                "max": 25000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Noida, India",
+            "employment_type": "Internship",
+            "ppo_claim": true,
+            "required_skills": [
+                "Programming fundamentals",
+                "Data structures",
+                "Algorithms",
+                "Problem-solving",
+                "Git"
+            ],
+            "preferred_skills": [
+                "Python",
+                "Java",
+                "JavaScript",
+                "React",
+                "REST APIs",
+                "SQL",
+                "NoSQL",
+                "Linux",
+                "Docker",
+                "AWS",
+                "CI/CD"
+            ],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7519773838482640896",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "PARTIALLY_VERIFIED",
+            "verification_note": "Similar current-looking technology internship listings found; confirm the exact requisition and application route."
+        },
+        {
+            "company": "Appbrew",
+            "role": "Associate Software Engineer (Frontend)",
+            "category": "Frontend Engineering",
+            "graduation_years": [
+                2024,
+                2025,
+                2026
+            ],
+            "salary_claim": {
+                "min": 45000,
+                "max": 70000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Delhi NCR, India",
+            "required_skills": [
+                "HTML",
+                "CSS",
+                "Responsive design",
+                "Mobile-first development"
+            ],
+            "preferred_skills": [
+                "CSS frameworks",
+                "Frontend debugging"
+            ],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7519773838482640896",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "POSSIBLY_CLOSED",
+            "verification_note": "Related company listing was marked no longer accepting applications; check for a new requisition."
+        },
+        {
+            "company": "aiqon",
+            "role": "Jr. AI Engineer",
+            "category": "AI / Full-Stack Engineering",
+            "graduation_years": [
+                2025,
+                2026,
+                2027
+            ],
+            "salary_claim": {
+                "min": 35000,
+                "max": 40000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Hyderabad, India",
+            "work_model": "Hybrid",
+            "required_skills": [
+                "Python or TypeScript/JavaScript",
+                "Git",
+                "HTTP",
+                "REST",
+                "Web fundamentals"
+            ],
+            "preferred_skills": [
+                "React",
+                "Node.js",
+                "Python web frameworks",
+                "Applied ML",
+                "LLM integrations",
+                "Model deployment"
+            ],
+            "application_url": "https://aiqon.in/careers/job/jr-ai-engineer",
+            "application_link_type": "Official career page",
+            "verification_status": "PARTIALLY_VERIFIED",
+            "verification_note": "Official page confirms fresher-to-2-year eligibility, Hyderabad/hybrid and INR 4-6 LPA; batch and exact monthly claim are unconfirmed."
+        },
+        {
+            "company": "TekWorks",
+            "role": "Business Analyst",
+            "category": "Business Analysis",
+            "graduation_years": [
+                2024,
+                2025,
+                2026
+            ],
+            "salary_claim": {
+                "min": 30000,
+                "max": 35000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Hyderabad, India",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7519773838482640896",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "Klimb",
+            "role": "Associate Product Manager",
+            "category": "Product Management",
+            "graduation_years": [
+                2025,
+                2026,
+                2027
+            ],
+            "salary_claim": {
+                "min": 40000,
+                "max": 60000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location_claim": "Remote",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7519773838482640896",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "DISCREPANCY",
+            "verification_note": "Company career site lists an Associate Product Manager role in Mumbai; remote location and compensation need confirmation."
+        },
+        {
+            "company": "Revvity",
+            "role": "Full-Stack AI Engineering Intern",
+            "job_id": "JR-045768",
+            "category": "AI / Full-Stack Engineering",
+            "graduation_years": [
+                2025,
+                2026,
+                2027,
+                2028
+            ],
+            "stipend_claim": {
+                "min": 30000,
+                "max": 30000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Thane, Maharashtra, India",
+            "required_skills": [
+                "Python",
+                "Next.js",
+                "Docker",
+                "Full-stack development",
+                "Programming",
+                "Prompt engineering"
+            ],
+            "preferred_skills": [
+                "JavaScript",
+                "LLMs",
+                "Enterprise software"
+            ],
+            "application_url": "https://revvity.wd103.myworkdayjobs.com/en-GB/External/job/Mumbai/Full-Stack-AI-Engineering-Intern_JR-045768/apply",
+            "questionnaire_url": "https://forms.cloud.microsoft/r/agdKBU4dTM",
+            "application_link_type": "Official employer application plus mandatory questionnaire",
+            "verification_status": "VERIFIED_ROLE",
+            "verification_note": "Official listing confirms role, requisition and two required application steps; stipend, batches and exact work arrangement not confirmed by the employer page."
+        },
+        {
+            "company": "Swiggy",
+            "role": "Associate Software Engineer",
+            "category": "Software Engineering",
+            "graduation_years": [
+                2026,
+                2027
+            ],
+            "ctc_claim": {
+                "min": 1000000,
+                "max": 1200000,
+                "currency": "INR",
+                "period": "year"
+            },
+            "benefits_claim": [
+                "ESOPs"
+            ],
+            "location": "Whitefield, Bengaluru, India",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7519268843182178304",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "Keploy",
+            "role": "SDE Intern",
+            "category": "Software Engineering",
+            "graduation_years": [
+                2026,
+                2027,
+                2028
+            ],
+            "stipend": {
+                "min": 40000,
+                "max": 50000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Bengaluru, India",
+            "employment_type": "Internship",
+            "ppo_claim": true,
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7519268843182178304",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "Swiggy",
+            "role": "SDE I",
+            "category": "Software Engineering",
+            "graduation_years": [
+                2022,
+                2023,
+                2024,
+                2025
+            ],
+            "ctc_claim": {
+                "min": 2000000,
+                "max": 2500000,
+                "currency": "INR",
+                "period": "year"
+            },
+            "benefits_claim": [
+                "ESOPs"
+            ],
+            "location": "Whitefield, Bengaluru, India",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7519268843182178304",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "YesMadam",
+            "role": "AI Intern",
+            "category": "Artificial Intelligence",
+            "graduation_years": [
+                2026,
+                2027,
+                2028
+            ],
+            "stipend": {
+                "min": 30000,
+                "max": 30000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Noida, India",
+            "employment_type": "Internship",
+            "ppo_claim": true,
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7519268843182178304",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "Inventia Technology",
+            "role": "Business Analyst",
+            "category": "Business Analysis",
+            "graduation_years": [
+                2024,
+                2025,
+                2026
+            ],
+            "salary_claim": {
+                "min": 30000,
+                "max": 40000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Noida, India",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7519268843182178304",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "Bureau",
+            "role": "Product Analyst Intern",
+            "category": "Product Analytics",
+            "graduation_years": [
+                2025,
+                2026,
+                2027
+            ],
+            "stipend": {
+                "min": 40000,
+                "max": 40000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Bengaluru, India",
+            "employment_type": "Internship",
+            "ppo_claim": true,
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7519268843182178304",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "Celebal Technologies",
+            "role": "DevOps Intern",
+            "category": "DevOps",
+            "graduation_years": [
+                2025,
+                2026,
+                2027,
+                2028
+            ],
+            "stipend": {
+                "min": 25000,
+                "max": 25000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Jaipur, India",
+            "employment_type": "Internship",
+            "ppo_claim": true,
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7519268843182178304",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "SaffronStays",
+            "role": "Product Intern",
+            "category": "Product Management",
+            "graduation_years": [
+                2026,
+                2027,
+                2028
+            ],
+            "stipend": {
+                "min": 35000,
+                "max": 35000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location_claim": "Remote",
+            "employment_type": "Internship",
+            "ppo_claim": true,
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7519268843182178304",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "The Wedding Company",
+            "role": "Software Engineering Intern (Backend)",
+            "category": "Backend Engineering",
+            "graduation_years": [
+                2027
+            ],
+            "stipend": {
+                "min": 30000,
+                "max": 40000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "ppo_ctc_claim": {
+                "min": 1000000,
+                "max": 1500000,
+                "currency": "INR",
+                "period": "year"
+            },
+            "location": "Bengaluru, India",
+            "employment_type": "Internship",
+            "required_skills": [
+                "Backend systems",
+                "APIs",
+                "Databases"
+            ],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7518705863180566528",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "PARTIALLY_VERIFIED",
+            "verification_note": "Recent job listing corroborates role, batch and compensation claims; check the employer application page."
+        },
+        {
+            "company": "Park+",
+            "role": "AI Engineering Intern",
+            "category": "Artificial Intelligence",
+            "graduation_years": [
+                2026,
+                2027,
+                2028
+            ],
+            "stipend": {
+                "min": 30000,
+                "max": 35000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Gurugram, India",
+            "employment_type": "Internship",
+            "ppo_claim": true,
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7518705863180566528",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "Park+",
+            "role": "AI Engineer",
+            "category": "Artificial Intelligence",
+            "graduation_years": [
+                2023,
+                2024,
+                2025
+            ],
+            "ctc_claim": {
+                "min": 1000000,
+                "max": 1500000,
+                "currency": "INR",
+                "period": "year"
+            },
+            "location": "Gurugram, India",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7518705863180566528",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "Stattr",
+            "role": "Junior Data Analyst",
+            "category": "Data Analytics",
+            "graduation_years": [
+                2025,
+                2026,
+                2027
+            ],
+            "salary_claim": {
+                "min": 30000,
+                "max": 30000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Palakkad, Kerala, India",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7518705863180566528",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "FNP",
+            "role": "SDE 1",
+            "category": "Software Engineering",
+            "graduation_years": [
+                2023,
+                2024,
+                2025,
+                2026
+            ],
+            "ctc_claim": {
+                "min": 1200000,
+                "max": 1800000,
+                "currency": "INR",
+                "period": "year"
+            },
+            "location": "Gurugram, India",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7518705863180566528",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "Thinkitive Technologies",
+            "role": "Java and React.js Developer",
+            "category": "Full-Stack Engineering",
+            "graduation_years": [
+                2025,
+                2026,
+                2027
+            ],
+            "salary_claim": {
+                "min": 30000,
+                "max": 45000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Pune, India",
+            "required_skills": [
+                "Java",
+                "React.js"
+            ],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7518705863180566528",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "Aristok Technologies",
+            "role": "Business Analyst",
+            "category": "Business Analysis",
+            "graduation_years": [
+                2024,
+                2025,
+                2026,
+                2027
+            ],
+            "salary_claim": {
+                "min": 35000,
+                "max": 50000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Pune, India",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7518705863180566528",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "SuperKalam",
+            "role": "Product Manager",
+            "category": "Product Management",
+            "graduation_years": [
+                2024,
+                2025,
+                2026
+            ],
+            "ctc_claim": {
+                "min": 1000000,
+                "max": 1500000,
+                "currency": "INR",
+                "period": "year"
+            },
+            "location": "Bengaluru, India",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7518705863180566528",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "Shadowfax",
+            "role": "Data Analyst",
+            "category": "Data Analytics",
+            "graduation_years": [
+                2023,
+                2024,
+                2025,
+                2026
+            ],
+            "ctc_claim": {
+                "min": 1000000,
+                "max": 1500000,
+                "currency": "INR",
+                "period": "year"
+            },
+            "location": "Bengaluru, India",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7518360026550325248",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "Matrice AI",
+            "role": "Software Engineering Intern",
+            "category": "Software Engineering",
+            "graduation_years": [
+                2026,
+                2027,
+                2028
+            ],
+            "stipend": {
+                "min": 60000,
+                "max": 80000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location_claim": "Remote",
+            "employment_type": "Internship",
+            "required_skills": [],
+            "application_url": "https://matrice.ai/careers",
+            "application_link_type": "Official career page",
+            "verification_status": "PARTIALLY_VERIFIED",
+            "verification_note": "Official site lists remote software engineering internships; verify the exact stipend, batch and current deadline."
+        },
+        {
+            "company": "Canonical",
+            "role": "Software Engineer",
+            "category": "Software Engineering",
+            "graduation_years": [
+                2024,
+                2025,
+                2026
+            ],
+            "ctc_claim": {
+                "min": 3500000,
+                "max": 5000000,
+                "currency": "INR",
+                "period": "year"
+            },
+            "location_claim": "Remote",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7518360026550325248",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "CoinSwitch",
+            "role": "Software Engineering Intern",
+            "category": "Software Engineering",
+            "graduation_years": [
+                2027
+            ],
+            "stipend": {
+                "min": 40000,
+                "max": 50000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Bengaluru, India",
+            "employment_type": "Internship",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7518360026550325248",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "RevRag AI",
+            "role": "Forward Deployed Engineer Intern (AI/ML)",
+            "category": "AI / Machine Learning Engineering",
+            "graduation_years": [
+                2025,
+                2026,
+                2027
+            ],
+            "stipend": {
+                "min": 50000,
+                "max": 50000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Bengaluru, India",
+            "employment_type": "Internship",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7518360026550325248",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "Avaloka.ai",
+            "role": "AI Intern",
+            "category": "Artificial Intelligence",
+            "graduation_years": [
+                2026,
+                2027,
+                2028
+            ],
+            "stipend": {
+                "min": 25000,
+                "max": 25000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location_claim": "Remote",
+            "employment_type": "Internship",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7518360026550325248",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "Rotto",
+            "role": "Software Full-Stack Intern",
+            "category": "Full-Stack Engineering",
+            "graduation_years": [
+                2025,
+                2026,
+                2027
+            ],
+            "stipend": {
+                "min": 35000,
+                "max": 35000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location": "Bengaluru, India",
+            "employment_type": "Internship",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7518360026550325248",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        },
+        {
+            "company": "InstaPrepsAI",
+            "role": "Product Management Intern",
+            "category": "Product Management",
+            "graduation_years": [
+                2027,
+                2028,
+                2029
+            ],
+            "stipend": {
+                "min": 20000,
+                "max": 20000,
+                "currency": "INR",
+                "period": "month"
+            },
+            "location_claim": "Remote",
+            "employment_type": "Internship",
+            "required_skills": [],
+            "application_url": "https://www.linkedin.com/feed/update/urn:li:activity:7518360026550325248",
+            "application_link_type": "Grouped referral post",
+            "verification_status": "UNVERIFIED"
+        }
+    ]
+}
