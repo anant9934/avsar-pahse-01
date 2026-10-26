@@ -63,7 +63,13 @@ export async function POST(request: NextRequest) {
     if (resumeId) {
       const resumeRepo = getResumeRepository();
       const targetResume = await resumeRepo.getById(resumeId);
-      if (targetResume && targetResume.candidateId !== auth.candidateId) {
+      if (!targetResume) {
+        return NextResponse.json(
+          { error: `Resume "${resumeId}" was not found.` },
+          { status: 404 }
+        );
+      }
+      if (targetResume.candidateId !== auth.candidateId) {
         return NextResponse.json(
           { error: "Forbidden: You cannot attach a resume belonging to another candidate." },
           { status: 403 }
