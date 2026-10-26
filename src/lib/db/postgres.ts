@@ -27,6 +27,77 @@ export function isPostgresConfigured(): boolean {
   return Boolean(process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== "");
 }
 
+/**
+ * Detect whether connection string targets Neon Serverless PostgreSQL
+ */
+export function isNeonDatabase(url = process.env.DATABASE_URL): boolean {
+  if (!url || typeof url !== "string") return false;
+  return url.toLowerCase().includes("neon.tech");
+}
+
+/**
+ * Detect whether connection string uses Neon's PgBouncer connection pooler endpoint
+ */
+export function isNeonPooledConnection(url = process.env.DATABASE_URL): boolean {
+  if (!url || !isNeonDatabase(url)) return false;
+  return url.toLowerCase().includes("-pooler.");
+}
+
+/**
+ * Safely mask database credentials in connection strings for logging/diagnostics
+ */
+export function maskConnectionString(url: string | null | undefined): string {
+  if (!url || typeof url !== "string") return "";
+  try {
+    const parsed = new URL(url);
+    if (parsed.password) {
+      parsed.password = "******";
+    }
+    return parsed.toString();
+  } catch {
+    return url.replace(/:([^@/]+)@/, ":******@");
+  }
+}
+
+/**
+ * Extract sanitized database metadata for telemetry and health status without credential exposure
+ */
+export function getDatabaseProviderInfo(): {
+  provider: "neon" | "postgres" | "unconfigured";
+  isPooled: boolean;
+  host: string | null;
+  isProductionReady: boolean;
+} {
+  const url = process.env.DATABASE_URL;
+  if (!url || url.trim() === "") {
+    return {
+      provider: "unconfigured",
+      isPooled: false,
+      host: null,
+      isProductionReady: false,
+    };
+  }
+
+  const isNeon = isNeonDatabase(url);
+  const isPooled = isNeonPooledConnection(url);
+
+  let host: string | null = null;
+  try {
+    const parsed = new URL(url);
+    host = parsed.host;
+  } catch {
+    const match = url.match(/@([^:/]+)/);
+    host = match ? match[1] : null;
+  }
+
+  return {
+    provider: isNeon ? "neon" : "postgres",
+    isPooled,
+    host,
+    isProductionReady: isNeon ? isPooled : Boolean(url),
+  };
+}
+
 export function getPgPool(): Pool {
   if (globalPool) {
     return globalPool;
@@ -49,9 +120,14 @@ export function getPgPool(): Pool {
     databaseUrl.includes("127.0.0.1") ||
     databaseUrl.includes(".internal");
 
+  const isNeon = isNeonDatabase(databaseUrl);
+
   // Determine SSL configuration
   let sslConfig: boolean | { rejectUnauthorized: boolean } = false;
-  if (!isLocalhost && !databaseUrl.includes("sslmode=disable")) {
+  if (isNeon) {
+    // Neon serverless endpoints enforce TLS encryption
+    sslConfig = { rejectUnauthorized: false };
+  } else if (!isLocalhost && !databaseUrl.includes("sslmode=disable")) {
     sslConfig = { rejectUnauthorized: false };
   }
 
@@ -120,25 +196,41 @@ export async function withTransaction<T>(
 export async function checkDatabaseHealth(): Promise<{
   status: "healthy" | "unhealthy";
   latencyMs: number;
+  provider?: "neon" | "postgres";
+  isPooled?: boolean;
   error?: string;
 }> {
   const start = Date.now();
+  const info = getDatabaseProviderInfo();
   try {
     if (!isPostgresConfigured()) {
       return {
         status: "unhealthy",
         latencyMs: 0,
+        provider: info.provider === "unconfigured" ? "postgres" : info.provider,
+        isPooled: info.isPooled,
         error: "DATABASE_URL is not configured.",
       };
     }
     const pool = getPgPool();
     await pool.query("SELECT 1 AS healthcheck");
     const latencyMs = Date.now() - start;
-    return { status: "healthy", latencyMs };
+    return {
+      status: "healthy",
+      latencyMs,
+      provider: info.provider === "unconfigured" ? "postgres" : info.provider,
+      isPooled: info.isPooled,
+    };
   } catch (err) {
     const latencyMs = Date.now() - start;
     const msg = err instanceof Error ? err.message : String(err);
-    return { status: "unhealthy", latencyMs, error: msg };
+    return {
+      status: "unhealthy",
+      latencyMs,
+      provider: info.provider === "unconfigured" ? "postgres" : info.provider,
+      isPooled: info.isPooled,
+      error: msg,
+    };
   }
 }
 
