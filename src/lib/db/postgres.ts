@@ -29,14 +29,19 @@ export class DatabaseUnavailableError extends Error {
   }
 }
 
+export function getDatabaseUrl(): string | undefined {
+  return process.env.DATABASE_URL || process.env.POSTGRES_URL;
+}
+
 export function isPostgresConfigured(): boolean {
-  return Boolean(process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== "");
+  const url = getDatabaseUrl();
+  return Boolean(url && url.trim() !== "");
 }
 
 /**
  * Detect whether connection string targets Neon Serverless PostgreSQL
  */
-export function isNeonDatabase(url = process.env.DATABASE_URL): boolean {
+export function isNeonDatabase(url = getDatabaseUrl()): boolean {
   if (!url || typeof url !== "string") return false;
   return url.toLowerCase().includes("neon.tech");
 }
@@ -44,7 +49,7 @@ export function isNeonDatabase(url = process.env.DATABASE_URL): boolean {
 /**
  * Detect whether connection string uses Neon's PgBouncer connection pooler endpoint
  */
-export function isNeonPooledConnection(url = process.env.DATABASE_URL): boolean {
+export function isNeonPooledConnection(url = getDatabaseUrl()): boolean {
   if (!url || !isNeonDatabase(url)) return false;
   return url.toLowerCase().includes("-pooler.");
 }
@@ -74,7 +79,7 @@ export function getDatabaseProviderInfo(): {
   host: string | null;
   isProductionReady: boolean;
 } {
-  const url = process.env.DATABASE_URL;
+  const url = getDatabaseUrl();
   if (!url || url.trim() === "") {
     return {
       provider: "unconfigured",
@@ -109,16 +114,16 @@ export function getPgPool(): Pool {
     return globalPool;
   }
 
-  const databaseUrl = process.env.DATABASE_URL;
+  const databaseUrl = getDatabaseUrl();
   const isProduction = process.env.NODE_ENV === "production";
 
   if (!databaseUrl || databaseUrl.trim() === "") {
     if (isProduction) {
       throw new DatabaseConfigurationError(
-        "DATABASE_URL is not configured in production environment. Application refuses to start with ephemeral storage."
+        "DATABASE_URL or POSTGRES_URL is not configured in production environment. Application refuses to start with ephemeral storage."
       );
     }
-    throw new DatabaseConfigurationError("DATABASE_URL is not set.");
+    throw new DatabaseConfigurationError("DATABASE_URL or POSTGRES_URL is not set.");
   }
 
   const isLocalhost =
