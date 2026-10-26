@@ -35,11 +35,9 @@ function ApplicationFlowContent({
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Additional questions state
-  const [experienceNotes, setExperienceNotes] = useState(
-    "Built multiple Next.js 15/16 web apps with strict TypeScript and modern responsive UI."
-  );
-  const [noticePeriod, setNoticePeriod] = useState("Immediate / June 2025 start");
-  const [portfolioUrl, setPortfolioUrl] = useState("https://rohan-portfolio.example.com");
+  const [experienceNotes, setExperienceNotes] = useState("");
+  const [noticePeriod, setNoticePeriod] = useState("Immediate");
+  const [portfolioUrl, setPortfolioUrl] = useState("");
   const [declaredConsent, setDeclaredConsent] = useState(true);
 
   const [submitting, setSubmitting] = useState(false);
@@ -63,6 +61,9 @@ function ApplicationFlowContent({
         if (profileRes.ok) {
           const pd = await profileRes.json();
           setCandidate(pd.candidate);
+          if (pd.candidate?.portfolio) {
+            setPortfolioUrl(pd.candidate.portfolio);
+          }
         }
         if (resumesRes.ok) {
           const rd = await resumesRes.json();
@@ -444,9 +445,9 @@ function ApplicationFlowContent({
                 </button>
               </div>
               <div className="text-xs text-[#242720] space-y-0.5">
-                <p className="font-bold">{candidate?.name || "Rohan Sharma"}</p>
-                <p className="text-[#77786F]">{candidate?.email || "rohan@example.com"}</p>
-                <p className="text-[#77786F]">{candidate?.location || "Bengaluru, Karnataka"}</p>
+                <p className="font-bold">{candidate?.name || "Candidate"}</p>
+                <p className="text-[#77786F]">{candidate?.email || "No email on file"}</p>
+                <p className="text-[#77786F]">{candidate?.location || "Location not specified"}</p>
               </div>
             </div>
 
@@ -469,7 +470,7 @@ function ApplicationFlowContent({
                   <FileText className="w-4 h-4" />
                 </div>
                 <span className="text-xs font-bold text-[#242720]">
-                  {selectedResume?.fileName || "Rohan_Sharma_Resume.pdf"}
+                  {selectedResume?.fileName || "Selected Resume"}
                 </span>
               </div>
             </div>
