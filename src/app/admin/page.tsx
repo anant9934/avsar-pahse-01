@@ -19,6 +19,10 @@ import {
   ArrowLeft,
   X,
   CheckCircle2,
+  Lock,
+  Unlock,
+  FileText,
+  Upload,
 } from "lucide-react";
 import { AvsarLogo } from "@/components/brand/AvsarLogo";
 import type { AdminMetrics } from "@/types";
@@ -41,13 +45,31 @@ export default function AdminDashboardPage() {
   });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+  const [adminPasskey, setAdminPasskey] = useState("");
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importJsonText, setImportJsonText] = useState("");
+  const [importResults, setImportResults] = useState<{
+    success?: boolean;
+    importedCount?: number;
+    duplicatesSkipped?: number;
+    errorsCount?: number;
+    error?: string;
+  } | null>(null);
+
   useEffect(() => {
     async function loadMetrics() {
       try {
-        const res = await fetch("/api/admin/metrics");
-        if (res.ok) {
-          const data = await res.json();
-          setMetrics(data.metrics);
+        const authRes = await fetch("/api/auth/admin");
+        const authData = await authRes.json();
+        setIsAuthorized(authData.isAdmin);
+
+        if (authData.isAdmin) {
+          const res = await fetch("/api/admin/metrics");
+          if (res.ok) {
+            const data = await res.json();
+            setMetrics(data.metrics);
+          }
         }
       } catch (err) {
         console.error(err);
@@ -55,6 +77,46 @@ export default function AdminDashboardPage() {
     }
     loadMetrics();
   }, []);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setShowAddJobModal(false);
+        setShowImportModal(false);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const handleAdminLogin = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!adminPasskey.trim()) {
+      setToastMessage("Please enter the administrator secret key.");
+      return;
+    }
+    try {
+      const res = await fetch("/api/auth/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secret: adminPasskey.trim() }),
+      });
+      if (res.ok) {
+        setIsAuthorized(true);
+        setToastMessage("Admin console unlocked successfully!");
+        const mRes = await fetch("/api/admin/metrics");
+        if (mRes.ok) {
+          const mData = await mRes.json();
+          setMetrics(mData.metrics);
+        }
+      } else {
+        const data = await res.json();
+        setToastMessage(`Authorization failed: ${data.error || "Invalid secret"}`);
+      }
+    } catch {
+      setToastMessage("Failed to authenticate as admin");
+    }
+  };
 
   const handleCreateJob = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,16 +145,56 @@ export default function AdminDashboardPage() {
         }),
       });
 
+      const resData = await res.json();
       if (res.ok) {
         setToastMessage(`Job listing "${newJobForm.title}" created successfully!`);
         setShowAddJobModal(false);
-        // refresh metrics
         const mRes = await fetch("/api/admin/metrics");
-        const mData = await mRes.json();
-        setMetrics(mData.metrics);
+        if (mRes.ok) {
+          const mData = await mRes.json();
+          setMetrics(mData.metrics);
+        }
+      } else {
+        setToastMessage(`Job creation rejected: ${resData.error || "Validation error"}`);
       }
     } catch (err) {
       console.error(err);
+      setToastMessage("Network error creating job");
+    }
+  };
+
+  const handleImportJson = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setImportResults(null);
+    try {
+      let parsedPayload: unknown;
+      try {
+        parsedPayload = JSON.parse(importJsonText);
+      } catch {
+        setImportResults({ error: "Invalid JSON format: Could not parse text." });
+        return;
+      }
+
+      const res = await fetch("/api/admin/import-jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(parsedPayload),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setImportResults(data);
+        setToastMessage(`Import completed: ${data.importedCount} added, ${data.duplicatesSkipped} duplicates skipped.`);
+        const mRes = await fetch("/api/admin/metrics");
+        if (mRes.ok) {
+          const mData = await mRes.json();
+          setMetrics(mData.metrics);
+        }
+      } else {
+        setImportResults({ error: data.error || "Import failed" });
+      }
+    } catch {
+      setImportResults({ error: "Network error during JSON import." });
     }
   };
 
@@ -136,6 +238,47 @@ export default function AdminDashboardPage() {
   }, "");
 
   const areaD = `${pathD} L ${points[points.length - 1].x} ${svgHeight} L ${points[0].x} ${svgHeight} Z`;
+
+  if (isAuthorized === false) {
+    return (
+      <div className="min-h-screen bg-[#F8F6F1] flex items-center justify-center p-6 text-[#242720]">
+        <div className="card-surface p-8 bg-white max-w-md w-full text-center shadow-xl">
+          <div className="w-12 h-12 rounded-full bg-[#FEF2F2] text-[#DC2626] flex items-center justify-center mx-auto mb-4">
+            <Lock className="w-6 h-6" />
+          </div>
+          <h2 className="text-xl font-bold text-[#242720] mb-1">Administrator Authorization Required</h2>
+          <p className="text-xs text-[#77786F] mb-6">
+            This dashboard is restricted to authorized platform administrators. Please enter the master passkey or unlock developer admin access.
+          </p>
+          <form onSubmit={handleAdminLogin} className="space-y-3">
+            <input
+              type="password"
+              placeholder="Admin passkey (default: avsar_admin_secret_2025)"
+              value={adminPasskey}
+              onChange={(e) => setAdminPasskey(e.target.value)}
+              className="w-full h-10 px-3 bg-[#FAF9F5] border border-[#EAE7DF] rounded-xl text-xs"
+            />
+            <button
+              type="submit"
+              className="w-full h-10 bg-[#285C45] hover:bg-[#1E4735] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2"
+            >
+              <Unlock className="w-4 h-4" /> Unlock Console
+            </button>
+          </form>
+          <div className="mt-4 pt-4 border-t border-[#ECEAE3] flex justify-between items-center text-xs">
+            <Link href="/home" className="text-[#77786F] hover:text-[#285C45]">← Return to Candidate View</Link>
+            <button
+              type="button"
+              onClick={() => handleAdminLogin()}
+              className="text-[#285C45] font-bold hover:underline"
+            >
+              Fast Dev Unlock
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8F6F1] flex flex-col md:flex-row text-[#242720]">
@@ -260,14 +403,25 @@ export default function AdminDashboardPage() {
               Dashboard
             </h1>
 
-            <button
-              type="button"
-              onClick={() => setShowAddJobModal(true)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#285C45] hover:bg-[#1E4735] text-white rounded-full text-xs font-bold shadow-xs transition-all"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Post New Job</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowImportModal(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border border-[#285C45] text-[#285C45] hover:bg-[#F2F7F3] rounded-full text-xs font-bold shadow-2xs transition-all"
+              >
+                <FileText className="w-4 h-4" />
+                <span>Import JSON</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowAddJobModal(true)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#285C45] hover:bg-[#1E4735] text-white rounded-full text-xs font-bold shadow-xs transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Post New Job</span>
+              </button>
+            </div>
           </div>
 
           {/* Metric KPI Cards (4 Across matching Screen 13) */}
@@ -490,16 +644,28 @@ export default function AdminDashboardPage() {
 
       {/* Post New Job Modal */}
       {showAddJobModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="card-surface p-6 bg-white w-full max-w-lg shadow-2xl relative">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="post-opp-title"
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4"
+          onClick={() => setShowAddJobModal(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="card-surface p-6 bg-white w-full max-w-lg shadow-2xl relative"
+          >
             <div className="flex items-center justify-between pb-3 border-b border-[#ECEAE3]">
-              <h3 className="text-base font-bold text-[#242720]">Post New Opportunity</h3>
+              <h3 id="post-opp-title" className="text-base font-bold text-[#242720]">
+                Post New Opportunity
+              </h3>
               <button
                 type="button"
                 onClick={() => setShowAddJobModal(false)}
-                className="text-[#77786F] hover:text-black"
+                aria-label="Close dialog"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-[#77786F] hover:text-black hover:bg-[#F2EFE9] transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
 
@@ -585,6 +751,126 @@ export default function AdminDashboardPage() {
                 >
                   Publish Opportunity
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Import Jobs JSON Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="card-surface p-6 bg-white w-full max-w-xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#ECEAE3]">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-[#285C45]" />
+                <h3 className="text-base font-bold text-[#242720]">Import Opportunities from JSON</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowImportModal(false);
+                  setImportResults(null);
+                }}
+                className="text-[#77786F] hover:text-black"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-[#77786F] mt-3">
+              Paste a JSON array of job listings (supports standard Avsar schema or <code className="bg-[#FAF9F5] px-1 py-0.5 rounded text-[#242720]">jobs.json</code> schema). Duplicate jobs are automatically detected and skipped.
+            </p>
+
+            <form onSubmit={handleImportJson} className="mt-4 space-y-3">
+              <div className="relative">
+                <textarea
+                  rows={8}
+                  required
+                  placeholder='[\n  {\n    "company": "Siemens",\n    "role": "Trainee",\n    "location": ["Bengaluru"],\n    "required_skills": ["Attention to detail", "Data accuracy"]\n  }\n]'
+                  value={importJsonText}
+                  onChange={(e) => setImportJsonText(e.target.value)}
+                  className="w-full p-3 font-mono text-[11px] bg-[#FAF9F5] border border-[#EAE7DF] rounded-xl text-[#242720] focus:outline-none focus:border-[#285C45]"
+                />
+              </div>
+
+              {/* Import Feedback / Errors */}
+              {importResults && (
+                <div
+                  className={`p-3 rounded-xl text-xs ${
+                    importResults.error
+                      ? "bg-[#FEF2F2] border border-[#FCA5A5] text-[#B91C1C]"
+                      : "bg-[#EAF4EB] border border-[#A7D7B0] text-[#285C45]"
+                  }`}
+                >
+                  {importResults.error ? (
+                    <span className="font-semibold">{importResults.error}</span>
+                  ) : (
+                    <div>
+                      <p className="font-bold">✓ Import Completed</p>
+                      <p className="mt-1">
+                        • <strong>{importResults.importedCount}</strong> new jobs added
+                      </p>
+                      <p>
+                        • <strong>{importResults.duplicatesSkipped}</strong> duplicates skipped
+                      </p>
+                      {importResults.errorsCount && importResults.errorsCount > 0 ? (
+                        <p className="text-amber-800 mt-1">
+                          • {importResults.errorsCount} items skipped due to validation errors
+                        </p>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="flex items-center justify-between pt-3 border-t border-[#ECEAE3]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImportJsonText(
+                      JSON.stringify(
+                        [
+                          {
+                            company: "Amazon Web Services",
+                            role: "Cloud Support Associate",
+                            location: ["Bengaluru, India"],
+                            work_model: "On-site",
+                            required_skills: ["Linux", "Networking", "Python", "Cloud Fundamentals"],
+                            description: "Troubleshoot complex cloud architectures and automate cloud infrastructure.",
+                            salary: "₹65,000/month",
+                            deadline: "15 Jun 2025"
+                          }
+                        ],
+                        null,
+                        2
+                      )
+                    );
+                  }}
+                  className="text-xs text-[#285C45] hover:underline font-semibold"
+                >
+                  Insert Sample Job
+                </button>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowImportModal(false);
+                      setImportResults(null);
+                    }}
+                    className="px-4 py-2 border border-[#EAE7DF] rounded-lg text-xs font-semibold"
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 bg-[#285C45] hover:bg-[#1E4735] text-white rounded-lg text-xs font-bold flex items-center gap-1.5"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Run Import</span>
+                  </button>
+                </div>
               </div>
             </form>
           </div>
