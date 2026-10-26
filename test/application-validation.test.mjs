@@ -62,3 +62,32 @@ test("Integration: POST /api/applications rejects attaching another candidate's 
   const data = await res.json();
   assert.ok(data.error.includes("Forbidden"), "Error message must indicate forbidden access");
 });
+
+test("Integration: POST /api/applications rejects submission with non-existent resume ID with 404", async () => {
+  const candidateSession = signSessionPayload({
+    userId: "cand_rohan_sharma_001",
+    name: "Rohan Sharma",
+    email: "rohan@example.com",
+    avatar: "/images/avatar-rohan.jpg",
+    role: "candidate",
+    provider: "ai_tathastu",
+    createdAt: Date.now(),
+  });
+
+  const res = await fetch(`${BASE_URL}/api/applications`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Cookie: `${SESSION_COOKIE_NAME}=${candidateSession}`,
+    },
+    body: JSON.stringify({
+      jobId: "job_google_fe_intern",
+      resumeId: "res_nonexistent_xyz_999",
+      answers: { whyJoin: "Test" },
+    }),
+  });
+
+  assert.equal(res.status, 404, "Submitting non-existent resume ID must return 404 Not Found");
+  const data = await res.json();
+  assert.ok(data.error.includes("not found"), "Error message must indicate resume not found");
+});
