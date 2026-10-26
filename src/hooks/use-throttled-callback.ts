@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useEffect } from "react";
 
 /**
  * Custom React hook that creates a throttled callback.
@@ -13,7 +13,10 @@ export function useThrottledCallback<A extends unknown[], R>(
 ): (...args: A) => R | undefined {
   const lastCallRef = useRef<number>(0);
   const callbackRef = useRef(callback);
-  callbackRef.current = callback;
+
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
 
   return useCallback(
     (...args: A) => {
