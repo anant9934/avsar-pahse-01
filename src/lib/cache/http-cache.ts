@@ -42,7 +42,7 @@ export function isNotModified(
  */
 export function buildCacheControlHeader(options: CacheControlOptions = {}): string {
   if (options.isPrivate) {
-    return "private, no-cache, no-store, must-revalidate, max-age=0, proxy-revalidate";
+    return "private, no-cache, no-store, must-revalidate";
   }
 
   const directives: string[] = ["public"];
