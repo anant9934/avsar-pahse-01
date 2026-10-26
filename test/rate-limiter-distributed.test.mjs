@@ -118,3 +118,18 @@ test("enforceRateLimit Guard: generates RFC compliant 429 response when limit ex
 
   resetRateLimiterForTesting();
 });
+
+test("checkRateLimit Helper: directly verifies identifier quota and remaining counts", async () => {
+  resetRateLimiterForTesting();
+  const policy = { windowMs: 1000, maxRequests: 3, prefix: "direct_test" };
+
+  const r1 = await checkRateLimit("user_123", policy);
+  assert.equal(r1.allowed, true);
+  assert.equal(r1.remaining, 2);
+
+  const r2 = await checkRateLimit("user_123", policy);
+  assert.equal(r2.allowed, true);
+  assert.equal(r2.remaining, 1);
+
+  resetRateLimiterForTesting();
+});
