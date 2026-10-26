@@ -11,6 +11,7 @@ export class RedisCacheProvider implements CacheProvider {
   private isConfigured = false;
   private restUrl?: string;
   private restToken?: string;
+  private inFlight = new Map<string, Promise<unknown>>();
 
   constructor(options?: { restUrl?: string; restToken?: string }) {
     this.fallbackMemory = new MemoryCacheProvider();
@@ -57,6 +58,16 @@ export class RedisCacheProvider implements CacheProvider {
         },
         body: JSON.stringify(serialized),
       });
+
+      // Maintain distributed tag membership sets in Redis for bulk invalidation
+      if (options?.tags && options.tags.length > 0) {
+        for (const tag of options.tags) {
+          const tagKey = `avsar:tag:${tag}`;
+          await fetch(`${this.restUrl}/sadd/${encodeURIComponent(tagKey)}/${encodeURIComponent(key)}`, {
+            headers: { Authorization: `Bearer ${this.restToken}` },
+          }).catch(() => {});
+        }
+      }
     } catch (err) {
       console.warn("[Redis Cache Set Warning]:", err);
     }
@@ -80,11 +91,40 @@ export class RedisCacheProvider implements CacheProvider {
   }
 
   async purgeTag(tag: string): Promise<number> {
-    // Tag purges are cleared in memory adapter
-    return await this.fallbackMemory.purgeTag(tag);
+    const memoryPurged = await this.fallbackMemory.purgeTag(tag);
+    if (!this.isConfigured || !this.restUrl || !this.restToken) {
+      return memoryPurged;
+    }
+
+    try {
+      const tagKey = `avsar:tag:${tag}`;
+      const membersRes = await fetch(`${this.restUrl}/smembers/${encodeURIComponent(tagKey)}`, {
+        headers: { Authorization: `Bearer ${this.restToken}` },
+      });
+
+      if (!membersRes.ok) return memoryPurged;
+      const json = await membersRes.json();
+      const keys = (json.result as string[]) || [];
+
+      let deletedCount = 0;
+      for (const k of keys) {
+        await this.delete(k);
+        deletedCount++;
+      }
+
+      // Clear tag set itself
+      await fetch(`${this.restUrl}/del/${encodeURIComponent(tagKey)}`, {
+        headers: { Authorization: `Bearer ${this.restToken}` },
+      }).catch(() => {});
+
+      return Math.max(memoryPurged, deletedCount);
+    } catch {
+      return memoryPurged;
+    }
   }
 
   async flush(): Promise<void> {
+    this.inFlight.clear();
     await this.fallbackMemory.flush();
   }
 
@@ -97,8 +137,22 @@ export class RedisCacheProvider implements CacheProvider {
     if (cached !== null) {
       return cached;
     }
-    const fresh = await fetcher();
-    await this.set(key, fresh, options);
-    return fresh;
+
+    // Singleflight stampede coalescing across concurrent calls within this instance
+    let promise = this.inFlight.get(key) as Promise<T> | undefined;
+    if (!promise) {
+      promise = (async () => {
+        try {
+          const fresh = await fetcher();
+          await this.set(key, fresh, options);
+          return fresh;
+        } finally {
+          this.inFlight.delete(key);
+        }
+      })();
+      this.inFlight.set(key, promise);
+    }
+
+    return await promise;
   }
 }
