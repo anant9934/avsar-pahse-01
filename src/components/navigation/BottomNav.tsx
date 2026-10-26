@@ -11,7 +11,7 @@ interface BottomNavProps {
   fluid?: boolean;
 }
 
-export function BottomNav({ savedCount, appliedCount, fluid = false }: BottomNavProps) {
+export function BottomNav({ savedCount, appliedCount }: BottomNavProps) {
   const pathname = usePathname();
 
   const navItems = [
