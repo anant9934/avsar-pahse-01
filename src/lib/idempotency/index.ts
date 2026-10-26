@@ -2,7 +2,7 @@ import { isPostgresConfigured } from "../db/postgres.ts";
 import { computePayloadHash } from "./fingerprint.ts";
 import { MemoryIdempotencyStorage } from "./memory-storage.ts";
 import { PostgresIdempotencyStorage } from "./storage.ts";
-import type { IdempotencyStorage, IdempotencyRecord } from "./types.ts";
+import type { IdempotencyStorage } from "./types.ts";
 
 export * from "./types.ts";
 export * from "./fingerprint.ts";
