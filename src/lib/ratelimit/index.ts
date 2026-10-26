@@ -1,18 +1,37 @@
 import { SlidingWindowLimiter, MemoryRateLimitStore } from "./sliding-window.ts";
+import { RedisRateLimitStore } from "./redis-store.ts";
 import { resolveClientIp } from "./ip-resolver.ts";
 import { getPolicyForPathname } from "./policies.ts";
 import type { RateLimitConfig, RateLimitResult } from "./types.ts";
 
 let globalLimiterInstance: SlidingWindowLimiter | null = null;
+let isSharedStoreActive = false;
 
 /**
  * Returns the active sliding-window rate limiter singleton.
+ * Uses distributed RedisRateLimitStore when Upstash credentials are present;
+ * falls back safely to in-memory sliding window when unconfigured.
  */
 export function getRateLimiter(): SlidingWindowLimiter {
   if (!globalLimiterInstance) {
-    globalLimiterInstance = new SlidingWindowLimiter(new MemoryRateLimitStore());
+    if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+      const redisStore = new RedisRateLimitStore();
+      globalLimiterInstance = new SlidingWindowLimiter(redisStore);
+      isSharedStoreActive = true;
+    } else {
+      globalLimiterInstance = new SlidingWindowLimiter(new MemoryRateLimitStore());
+      isSharedStoreActive = false;
+    }
   }
   return globalLimiterInstance;
+}
+
+/**
+ * Checks whether rate limits are globally enforced across instances.
+ */
+export function isGlobalRateLimitingActive(): boolean {
+  getRateLimiter(); // ensures initialized
+  return isSharedStoreActive;
 }
 
 /**
@@ -45,6 +64,7 @@ export async function enforceRateLimit(
   const policy = customPolicy || getPolicyForPathname(url.pathname);
 
   const result = await getRateLimiter().check(identifier, policy);
+  const scope = isSharedStoreActive ? "global" : "local-degraded";
 
   if (!result.allowed) {
     return Response.json(
@@ -59,6 +79,7 @@ export async function enforceRateLimit(
           "X-RateLimit-Limit": String(result.limit),
           "X-RateLimit-Remaining": String(result.remaining),
           "X-RateLimit-Reset": String(result.resetMs),
+          "X-RateLimit-Scope": scope,
         },
       }
     );
@@ -72,9 +93,12 @@ export async function enforceRateLimit(
  */
 export function resetRateLimiterForTesting(): void {
   globalLimiterInstance = null;
+  isSharedStoreActive = false;
 }
 
 export * from "./types.ts";
 export * from "./ip-resolver.ts";
+export * from "./trusted-proxies.ts";
+export * from "./redis-store.ts";
 export * from "./sliding-window.ts";
 export * from "./policies.ts";
