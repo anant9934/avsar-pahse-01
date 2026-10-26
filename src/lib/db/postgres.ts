@@ -4,6 +4,11 @@ import type { Pool, PoolClient, QueryResult, QueryResultRow } from "pg";
 import fs from "node:fs";
 import path from "node:path";
 import { executeWithBreaker } from "../circuit-breaker/index.ts";
+import { withTransaction as withManagedTransaction, type TransactionOptions } from "./transaction-helper.ts";
+import { withConnectionLease } from "./connection-lifecycle.ts";
+import { ParameterizedQueryBuilder } from "./query-builder.ts";
+
+export { withConnectionLease, ParameterizedQueryBuilder };
 
 let globalPool: Pool | null = null;
 
@@ -235,28 +240,15 @@ export async function query<R extends QueryResultRow = QueryResultRow>(
 }
 
 /**
- * Execute database operations within an atomic ACID transaction
+ * Execute database operations within an atomic ACID transaction.
+ * Supports savepoints, connection leak prevention, and serialization retries.
  */
 export async function withTransaction<T>(
-  callback: (client: PoolClient) => Promise<T>
+  callback: (client: PoolClient) => Promise<T>,
+  options?: TransactionOptions
 ): Promise<T> {
   const pool = getPgPool();
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
-    const result = await callback(client);
-    await client.query("COMMIT");
-    return result;
-  } catch (err) {
-    try {
-      await client.query("ROLLBACK");
-    } catch (rollbackErr) {
-      console.error("[PostgreSQL Transaction Rollback Error]:", rollbackErr);
-    }
-    throw err;
-  } finally {
-    client.release();
-  }
+  return withManagedTransaction(pool, callback, options);
 }
 
 /**
