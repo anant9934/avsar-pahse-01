@@ -2,6 +2,12 @@ import type { MetadataRoute } from "next";
 import { resolveDeploymentBaseUrl } from "../lib/auth/aitathastu.ts";
 import { getJobRepository } from "../lib/repository/index.ts";
 
+function parseValidDate(dateStr?: string | null, fallback: Date = new Date()): Date {
+  if (!dateStr || typeof dateStr !== "string") return fallback;
+  const parsed = new Date(dateStr);
+  return Number.isNaN(parsed.getTime()) ? fallback : parsed;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = resolveDeploymentBaseUrl();
   const now = new Date();
@@ -40,7 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const { jobs } = await jobRepo.list({ limit: 50 });
     const jobRoutes: MetadataRoute.Sitemap = jobs.map((job) => ({
       url: `${baseUrl}/jobs/${job.id}`,
-      lastModified: job.postedAt ? new Date(job.postedAt) : now,
+      lastModified: parseValidDate(job.postedAt, now),
       changeFrequency: "weekly",
       priority: 0.8,
     }));
