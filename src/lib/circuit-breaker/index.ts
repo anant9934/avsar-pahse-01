@@ -31,3 +31,4 @@ export { getAllCircuitStats, resetAllCircuits };
 export * from "./types.ts";
 export * from "./circuit-breaker.ts";
 export * from "./registry.ts";
+export * from "./load-shedder.ts";
