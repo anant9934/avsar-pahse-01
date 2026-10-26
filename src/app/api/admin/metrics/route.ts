@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { getJobRepository, getApplicationRepository } from "@/lib/repository";
 import { checkAdminAuth } from "@/lib/auth/admin";
 import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
+import { cacheGetOrSet } from "@/lib/cache";
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,20 +12,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: auth.reason || "Unauthorized" }, { status: 401 });
     }
 
-    const metrics = db.getAdminMetrics();
+    const metrics = await cacheGetOrSet(
+      "metrics:admin_summary",
+      async () => {
+        const baseMetrics = db.getAdminMetrics();
+        try {
+          const jobRepo = getJobRepository();
+          const appRepo = getApplicationRepository();
+          const totalJobs = await jobRepo.count();
+          const allApps = await appRepo.listAll();
 
-    // Reconcile with live counts from repository
-    try {
-      const jobRepo = getJobRepository();
-      const appRepo = getApplicationRepository();
-      const totalJobs = await jobRepo.count();
-      const allApps = await appRepo.listAll();
-
-      metrics.totalJobs = totalJobs;
-      metrics.applicationsCount = allApps.length;
-    } catch {
-      // Best-effort metrics enrichment
-    }
+          baseMetrics.totalJobs = totalJobs;
+          baseMetrics.applicationsCount = allApps.length;
+        } catch {
+          // Best-effort metrics enrichment
+        }
+        return baseMetrics;
+      },
+      { ttlSeconds: 30, tags: ["metrics"] }
+    );
 
     return NextResponse.json({ metrics });
   } catch (err: unknown) {
