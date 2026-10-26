@@ -3,6 +3,7 @@ const { Pool: PgPool } = pg;
 import type { Pool, PoolClient, QueryResult, QueryResultRow } from "pg";
 import fs from "node:fs";
 import path from "node:path";
+import { executeWithBreaker } from "../circuit-breaker/index.ts";
 
 let globalPool: Pool | null = null;
 
@@ -224,11 +225,13 @@ export async function query<R extends QueryResultRow = QueryResultRow>(
     }
   };
 
-  // Automatically retry read-only queries on transient network drops
-  if (isSelect) {
-    return await executeWithRetry(runQuery, 2, 50);
-  }
-  return await runQuery();
+  // Protect database queries with neon_db circuit breaker and transient retries
+  return await executeWithBreaker("neon_db", async () => {
+    if (isSelect) {
+      return await executeWithRetry(runQuery, 2, 50);
+    }
+    return await runQuery();
+  });
 }
 
 /**
