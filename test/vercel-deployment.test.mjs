@@ -106,6 +106,16 @@ test("Vercel Deployment 4: Dynamic Sitemap URL Indexation", async () => {
     assert.ok(urls.includes("https://avsar.ai/explore"));
     assert.ok(urls.includes("https://avsar.ai/home"));
     assert.ok(urls.includes("https://avsar.ai/welcome"));
+
+    // Verify all lastModified entries can safely be converted to ISO strings
+    for (const entry of mapEntries) {
+      if (entry.lastModified) {
+        assert.doesNotThrow(() => {
+          const iso = new Date(entry.lastModified).toISOString();
+          assert.ok(typeof iso === "string" && iso.length > 0);
+        }, "Every sitemap lastModified date must be a valid ISO time value");
+      }
+    }
   } finally {
     process.env = origEnv;
   }
