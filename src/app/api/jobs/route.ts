@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getJobRepository, getCandidateRepository, getSavedJobRepository } from "@/lib/repository";
 import { calculateJobMatch } from "@/lib/matching";
 import { checkAdminAuth } from "@/lib/auth/admin";
+import { getAuthenticatedCandidate } from "@/lib/auth/session";
 import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
 
 export async function GET(request: NextRequest) {
@@ -32,7 +33,12 @@ export async function GET(request: NextRequest) {
       status,
     });
 
-    const candidate = (await candRepo.getById("cand_rohan_sharma_001")) || (await candRepo.listAll())[0];
+    const auth = getAuthenticatedCandidate(request);
+    const candidateId = auth?.candidateId || "cand_rohan_sharma_001";
+    const candidate =
+      (await candRepo.getById(candidateId)) ||
+      (await candRepo.getById("cand_rohan_sharma_001")) ||
+      (await candRepo.listAll())[0];
 
     let jobs = rawJobs;
 
