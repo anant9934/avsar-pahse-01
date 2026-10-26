@@ -272,7 +272,7 @@ export class PostgresCandidateRepository implements CandidateRepository {
 // -----------------------------------------------------------------------------
 
 export class PostgresJobRepository implements JobRepository {
-  async list(filter?: JobFilterOptions): Promise<{ jobs: Job[]; total: number }> {
+  async list(filter?: JobFilterOptions): Promise<{ jobs: Job[]; total: number; nextCursor?: string }> {
     const conditions: string[] = [];
     const values: unknown[] = [];
     let paramIndex = 1;
@@ -313,23 +313,59 @@ export class PostgresJobRepository implements JobRepository {
       conditions.push(`is_possibly_closed = FALSE`);
     }
 
+    // Keyset cursor pagination (fast O(log N) deep pagination)
+    if (filter?.cursor) {
+      try {
+        const decoded = Buffer.from(filter.cursor, "base64").toString("utf8");
+        const [cursorTime, cursorId] = decoded.split("::");
+        if (cursorTime && cursorId) {
+          conditions.push(`(created_at, id) < ($${paramIndex}, $${paramIndex + 1})`);
+          values.push(cursorTime, cursorId);
+          paramIndex += 2;
+        }
+      } catch (cursorErr) {
+        console.warn("[PostgreSQL Keyset Cursor] Failed to decode cursor:", cursorErr);
+      }
+    }
+
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
     const countRes = await query(`SELECT COUNT(*) as count FROM jobs ${whereClause}`, values);
     const total = parseInt(countRes.rows[0].count, 10);
 
-    let queryText = `SELECT * FROM jobs ${whereClause} ORDER BY created_at DESC`;
-    if (filter?.limit && filter.limit > 0) {
-      const page = filter.page && filter.page > 0 ? filter.page : 1;
-      const offset = (page - 1) * filter.limit;
+    // Safe sorting allowlist
+    let sortOrder = "ORDER BY created_at DESC, id DESC";
+    if (filter?.sortBy === "deadline") {
+      sortOrder = "ORDER BY deadline ASC NULLS LAST, created_at DESC";
+    }
+
+    let queryText = `SELECT * FROM jobs ${whereClause} ${sortOrder}`;
+    const limit = filter?.limit && filter.limit > 0 ? Math.min(filter.limit, 100) : 20;
+
+    if (!filter?.cursor) {
+      const page = filter?.page && filter.page > 0 ? filter.page : 1;
+      const offset = (page - 1) * limit;
       queryText += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
-      values.push(filter.limit, offset);
+      values.push(limit, offset);
+    } else {
+      queryText += ` LIMIT $${paramIndex}`;
+      values.push(limit);
     }
 
     const res = await query(queryText, values);
+    const jobs = res.rows.map(mapJobRow);
+
+    let nextCursor: string | undefined;
+    if (jobs.length === limit && jobs.length > 0) {
+      const last = jobs[jobs.length - 1];
+      const rawCreatedAt = res.rows[res.rows.length - 1]?.created_at || new Date().toISOString();
+      nextCursor = Buffer.from(`${rawCreatedAt}::${last.id}`).toString("base64");
+    }
+
     return {
-      jobs: res.rows.map(mapJobRow),
+      jobs,
       total,
+      nextCursor,
     };
   }
 
@@ -826,6 +862,15 @@ export class PostgresApplicationRepository implements ApplicationRepository {
       };
     });
   }
+
+  async hasAppliedBatch(candidateId: string, jobIds: string[]): Promise<Set<string>> {
+    if (!candidateId || jobIds.length === 0) return new Set();
+    const res = await query(
+      `SELECT job_id FROM applications WHERE candidate_id = $1 AND job_id = ANY($2::varchar[])`,
+      [candidateId, jobIds]
+    );
+    return new Set(res.rows.map((r) => r.job_id));
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -871,6 +916,15 @@ export class PostgresSavedJobRepository implements SavedJobRepository {
       [candidateId, jobId]
     );
     return res.rows.length > 0;
+  }
+
+  async isSavedBatch(candidateId: string, jobIds: string[]): Promise<Set<string>> {
+    if (!candidateId || jobIds.length === 0) return new Set();
+    const res = await query(
+      `SELECT job_id FROM saved_jobs WHERE candidate_id = $1 AND job_id = ANY($2::varchar[])`,
+      [candidateId, jobIds]
+    );
+    return new Set(res.rows.map((r) => r.job_id));
   }
 }
 
