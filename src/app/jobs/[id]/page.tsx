@@ -1,8 +1,10 @@
 import React, { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { getJobRepository, getCandidateRepository, getSavedJobRepository } from "@/lib/repository";
 import { calculateJobMatch } from "@/lib/matching";
+import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth/session";
 import { JobDetailClient } from "./JobDetailClient";
 
 export default async function JobDetailPage({
@@ -20,7 +22,15 @@ export default async function JobDetailPage({
     notFound();
   }
 
-  const candidate = (await candRepo.getById("cand_rohan_sharma_001")) || (await candRepo.listAll())[0];
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  const session = sessionToken ? verifySessionToken(sessionToken) : null;
+  const candidateId = session?.userId || "cand_rohan_sharma_001";
+
+  const candidate =
+    (await candRepo.getById(candidateId)) ||
+    (await candRepo.getById("cand_rohan_sharma_001")) ||
+    (await candRepo.listAll())[0];
   const match = candidate ? calculateJobMatch(candidate, job) : null;
   const isSaved = candidate ? await savedRepo.isSaved(candidate.id, job.id) : false;
 
