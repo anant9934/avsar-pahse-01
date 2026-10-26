@@ -1,15 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import fs from "node:fs";
+import { getResumeRepository } from "@/lib/repository";
+import { getStorageProvider, validateDocumentMagicBytes } from "@/lib/storage";
+import { getAuthenticatedCandidate } from "@/lib/auth/session";
 import path from "node:path";
+import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
 
-export async function GET() {
-  const resumes = db.getResumes();
-  return NextResponse.json({ resumes });
+export async function GET(request: NextRequest) {
+  try {
+    const auth = getAuthenticatedCandidate(request);
+    if (!auth) {
+      return NextResponse.json(
+        { error: "Unauthorized: Candidate session required to view resumes." },
+        { status: 401 }
+      );
+    }
+
+    const resumeRepo = getResumeRepository();
+    const resumes = await resumeRepo.listByCandidate(auth.candidateId);
+    return NextResponse.json({ resumes });
+  } catch (err: unknown) {
+    if (err instanceof DatabaseUnavailableError || err instanceof DatabaseConfigurationError) {
+      return NextResponse.json(
+        { error: "Database service temporarily unavailable. Please try again shortly." },
+        { status: 503 }
+      );
+    }
+    const msg = err instanceof Error ? err.message : "Internal server error";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = getAuthenticatedCandidate(request);
+    if (!auth) {
+      return NextResponse.json(
+        { error: "Unauthorized: Candidate session required to upload resumes." },
+        { status: 401 }
+      );
+    }
+
     const contentType = request.headers.get("content-type") || "";
 
     if (contentType.includes("multipart/form-data")) {
@@ -39,43 +69,71 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Store file in server private storage
-      const storageDir = path.join(process.cwd(), "data", "resumes");
-      if (!fs.existsSync(storageDir)) {
-        fs.mkdirSync(storageDir, { recursive: true });
+      const buffer = Buffer.from(await file.arrayBuffer());
+
+      // Magic bytes verification (prevent renamed executable payloads)
+      const isValidDocument = validateDocumentMagicBytes(buffer, ext);
+      if (!isValidDocument) {
+        return NextResponse.json(
+          {
+            error:
+              "Corrupted or invalid document format: file contents do not match the expected document type signature.",
+          },
+          { status: 400 }
+        );
       }
 
-      const safeFileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-      const targetPath = path.join(storageDir, safeFileName);
-      const buffer = Buffer.from(await file.arrayBuffer());
-      fs.writeFileSync(targetPath, buffer);
+      // Upload file to private durable object storage
+      const storage = getStorageProvider();
+      const mimeMap: Record<string, string> = {
+        ".pdf": "application/pdf",
+        ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ".doc": "application/msword",
+      };
+      const resolvedMime = mimeMap[ext] || "application/octet-stream";
 
-      const candidate = db.getCandidate();
+      const uploadResult = await storage.upload(auth.candidateId, file.name, buffer, resolvedMime);
       const sizeStr = (file.size / (1024 * 1024)).toFixed(1) + " MB";
 
-      const newResume = db.addResume({
-        candidateId: candidate.id,
-        fileName: file.name,
-        fileSize: sizeStr,
-        isPrimary: true,
-        filePath: targetPath,
-      });
+      // Persist resume metadata in repository
+      const resumeRepo = getResumeRepository();
+      const newResume = await resumeRepo.create(
+        {
+          candidateId: auth.candidateId,
+          fileName: file.name,
+          fileSize: sizeStr,
+          isPrimary: true,
+          filePath: uploadResult.storagePath || undefined,
+          storageProvider: uploadResult.provider,
+          storageKey: uploadResult.key,
+        },
+        auth.candidateId
+      );
 
       return NextResponse.json({ success: true, resume: newResume });
     }
 
     // JSON fallback
     const body = await request.json();
-    const candidate = db.getCandidate();
-    const newResume = db.addResume({
-      candidateId: candidate.id,
-      fileName: body.fileName || "Candidate_Resume.pdf",
-      fileSize: body.fileSize || "1.2 MB",
-      isPrimary: body.isPrimary ?? false,
-    });
+    const resumeRepo = getResumeRepository();
+    const newResume = await resumeRepo.create(
+      {
+        candidateId: auth.candidateId,
+        fileName: body.fileName || "Candidate_Resume.pdf",
+        fileSize: body.fileSize || "1.2 MB",
+        isPrimary: body.isPrimary ?? false,
+      },
+      auth.candidateId
+    );
 
     return NextResponse.json({ success: true, resume: newResume });
   } catch (err: unknown) {
+    if (err instanceof DatabaseUnavailableError || err instanceof DatabaseConfigurationError) {
+      return NextResponse.json(
+        { error: "Database service temporarily unavailable. Please try again shortly." },
+        { status: 503 }
+      );
+    }
     const msg = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
