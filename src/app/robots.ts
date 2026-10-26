@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { resolveDeploymentBaseUrl } from "@/lib/auth/aitathastu";
+import { resolveDeploymentBaseUrl } from "../lib/auth/aitathastu.ts";
 
 export default function robots(): MetadataRoute.Robots {
   const baseUrl = resolveDeploymentBaseUrl();
