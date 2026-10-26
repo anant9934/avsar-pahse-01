@@ -34,25 +34,62 @@ export class MemoryQueue {
   }
 
   /**
-   * Enqueues an asynchronous background job.
+   * Enqueues an asynchronous background job with optional priority and retry override.
    */
-  async enqueue<T>(type: string, payload: T, maxRetriesOverride?: number): Promise<QueueJob<T>> {
+  async enqueue<T>(
+    type: string,
+    payload: T,
+    optionsOrRetries?: number | { maxRetries?: number; priority?: import("./types.ts").JobPriority }
+  ): Promise<QueueJob<T>> {
+    let maxRetriesOverride: number | undefined;
+    let priority: import("./types.ts").JobPriority = "normal";
+
+    if (typeof optionsOrRetries === "number") {
+      maxRetriesOverride = optionsOrRetries;
+    } else if (typeof optionsOrRetries === "object" && optionsOrRetries !== null) {
+      maxRetriesOverride = optionsOrRetries.maxRetries;
+      if (optionsOrRetries.priority) priority = optionsOrRetries.priority;
+    }
+
     const job: QueueJob<T> = {
       id: `job_${randomUUID()}`,
       type,
       payload,
       status: "pending",
+      priority,
       attempts: 0,
       maxAttempts: maxRetriesOverride ?? this.maxRetries,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
 
-    this.pending.push(job as QueueJob);
+    this.insertPending(job as QueueJob);
+
     // Non-blocking trigger of worker loop
     queueMicrotask(() => this.triggerWorkerLoop());
 
     return job;
+  }
+
+  /**
+   * Inserts job into pending list according to priority (high -> normal -> low).
+   */
+  private insertPending(job: QueueJob): void {
+    const priorityWeight: Record<import("./types.ts").JobPriority, number> = {
+      high: 2,
+      normal: 1,
+      low: 0,
+    };
+    const currentWeight = priorityWeight[job.priority || "normal"];
+    const insertIdx = this.pending.findIndex(
+      (item) => priorityWeight[item.priority || "normal"] < currentWeight
+    );
+
+    if (insertIdx === -1) {
+      this.pending.push(job);
+    } else {
+      this.pending.splice(insertIdx, 0, job);
+    }
   }
 
   /**
@@ -105,7 +142,7 @@ export class MemoryQueue {
         setTimeout(() => {
           this.delayedCount--;
           job.status = "pending";
-          this.pending.push(job);
+          this.insertPending(job);
           this.triggerWorkerLoop();
         }, delay);
       } else {
