@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSavedJobRepository, getJobRepository } from "@/lib/repository";
 import { getAuthenticatedCandidate } from "@/lib/auth/session";
 import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
+import { enqueueJob } from "@/lib/queue";
 
 export async function GET(request: NextRequest) {
   try {
@@ -63,6 +64,16 @@ export async function POST(request: NextRequest) {
 
     const savedRepo = getSavedJobRepository();
     const result = await savedRepo.toggle(auth.candidateId, jobId);
+
+    // Asynchronously dispatch background audit event
+    await enqueueJob("audit_log", {
+      actorType: "candidate",
+      actorId: auth.candidateId,
+      action: result.isSaved ? "save_job" : "unsave_job",
+      resourceType: "job",
+      resourceId: jobId,
+    });
+
     return NextResponse.json(result);
   } catch (err: unknown) {
     if (err instanceof DatabaseUnavailableError || err instanceof DatabaseConfigurationError) {
