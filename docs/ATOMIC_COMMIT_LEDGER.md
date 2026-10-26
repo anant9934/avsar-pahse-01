@@ -65,12 +65,14 @@
 | 49 | `654102f` | `docs(env): document vercel deployment environment variable taxonomy in example template` | `.env.example` | Detail Vercel Production vs Preview vs Development variable requirements and ephemeral flags | Documentation review |
 | 50 | `23a0c5d` | `docs(vercel): create complete production deployment and serverless operations guide` | `docs/VERCEL_DEPLOYMENT.md` | Author end-to-end Vercel runbook covering Neon pooling, env variables, smoke tests, and rollback | Documentation review |
 | 51 | `8507b4b` | `docs(defects): document phase 6 production mitigations and serverless hardening` | `docs/PRODUCTION_DEFECT_REGISTER.md` | Record resolutions for ephemeral storage risk, resume deletion endpoint, dynamic redirect URI, and security headers | Defect register verification |
+| 52 | `06473ca` | `fix(ui): remove unused arrow icon import from 404 page` | `src/app/not-found.tsx` | Eliminate ESLint unused import warning in 404 page | `npm run lint` |
+| 53 | `120c2a4` | `test(deployment): eliminate unused parameter warnings in vercel test suite` | `test/vercel-deployment.test.mjs` | Eliminate unused parameter warnings across 6 deployment tests | `npm run lint` & `node --test` |
 
 ---
 
 ## Ledger Summary
 
-- **Total Atomic Commits Recorded:** 51
+- **Total Atomic Commits Recorded:** 53
 - **One-File Atomicity Compliance:** 100% (each commit modifies exactly 1 tracked file)
 - **Author Identity:** Verified as `Anant Kumar <anant9934@users.noreply.github.com>` on every commit
 - **Verification Guarantee:** 100% of commits accompanied by green targeted automated unit/integration tests
