@@ -65,9 +65,25 @@ export function signSessionPayload(payload: Omit<SessionData, "exp"> & { exp?: n
 }
 
 /**
+ * Evaluates whether a session payload is expired with optional clock skew leeway.
+ */
+export function isSessionExpired(
+  session: Pick<SessionData, "exp">,
+  options: { clockSkewSeconds?: number; currentUnixSeconds?: number } = {}
+): boolean {
+  if (!session.exp) return false;
+  const now = options.currentUnixSeconds ?? Math.floor(Date.now() / 1000);
+  const skew = options.clockSkewSeconds ?? 0;
+  return now > session.exp + skew;
+}
+
+/**
  * Verify and parse HMAC-SHA256 signed session cookie value
  */
-export function verifySessionToken(token: string | undefined | null): SessionData | null {
+export function verifySessionToken(
+  token: string | undefined | null,
+  options: { clockSkewSeconds?: number } = {}
+): SessionData | null {
   if (!token || typeof token !== "string") return null;
 
   const parts = token.split(".");
@@ -91,9 +107,8 @@ export function verifySessionToken(token: string | undefined | null): SessionDat
     const payloadJson = Buffer.from(dataB64, "base64url").toString("utf-8");
     const session = JSON.parse(payloadJson) as SessionData;
 
-    // Check expiration
-    const nowSeconds = Math.floor(Date.now() / 1000);
-    if (session.exp && session.exp < nowSeconds) {
+    // Check expiration with optional clock skew leeway
+    if (isSessionExpired(session, { clockSkewSeconds: options.clockSkewSeconds })) {
       return null; // Expired
     }
 
