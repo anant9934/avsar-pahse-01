@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Smartphone, Monitor, ShieldCheck } from "lucide-react";
@@ -25,6 +25,41 @@ export function MobileShell({
 }: MobileShellProps) {
   const pathname = usePathname();
   const [deviceMode, setDeviceMode] = useState<"phone" | "fluid">("phone");
+  const [fetchedAppliedCount, setFetchedAppliedCount] = useState<number | undefined>(undefined);
+  const [fetchedSavedCount, setFetchedSavedCount] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (appliedCount !== undefined) return;
+    let ignore = false;
+    fetch("/api/applications")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!ignore && Array.isArray(data)) setFetchedAppliedCount(data.length);
+      })
+      .catch(() => {});
+    return () => {
+      ignore = true;
+    };
+  }, [appliedCount, pathname]);
+
+  useEffect(() => {
+    if (savedCount !== undefined) return;
+    let ignore = false;
+    fetch("/api/jobs/saved")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!ignore && data && Array.isArray(data.savedJobIds)) {
+          setFetchedSavedCount(data.savedJobIds.length);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      ignore = true;
+    };
+  }, [savedCount, pathname]);
+
+  const liveAppliedCount = appliedCount !== undefined ? appliedCount : fetchedAppliedCount;
+  const liveSavedCount = savedCount !== undefined ? savedCount : fetchedSavedCount;
 
   // Screen quick navigation list matching the 13 reference screens
   const screens = [
@@ -44,15 +79,23 @@ export function MobileShell({
   ];
 
   return (
-    <div className="min-h-screen bg-[#EDEAE3] flex flex-col items-center">
-      {/* Top Reviewer Nav & Device Mode Switcher (Visible on desktop) */}
-      <div className="w-full bg-[#242720] text-white text-xs px-3 py-2 flex flex-wrap items-center justify-between gap-2 shadow-sm z-50">
+    <div className="min-h-screen bg-[#F8F6F1] md:bg-[#EDEAE3] flex flex-col items-center w-full overflow-x-hidden">
+      {/* Skip to main content link for keyboard & screen reader accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#285C45] focus:text-white focus:rounded-full focus:shadow-lg focus:font-semibold focus:text-xs"
+      >
+        Skip to main content
+      </a>
+
+      {/* Top Reviewer Nav & Device Mode Switcher (Visible on desktop/tablets only) */}
+      <div className="hidden md:flex w-full bg-[#242720] text-white text-xs px-4 py-2 items-center justify-between gap-2 shadow-sm z-50">
         <div className="flex items-center gap-2">
           <span className="font-bold text-[#EBF3E9] flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-[#48B37C]" />
             AVSAR UI Suite
           </span>
-          <span className="hidden sm:inline text-white/50">|</span>
+          <span className="text-white/50">|</span>
           {/* Quick jump pills */}
           <div className="hidden lg:flex items-center gap-1 overflow-x-auto max-w-2xl py-0.5">
             {screens.map((s) => {
@@ -77,7 +120,7 @@ export function MobileShell({
 
         <div className="flex items-center gap-2 ml-auto">
           {/* Toggle between phone frame and full responsive view */}
-          <div className="hidden md:flex items-center bg-white/10 rounded-lg p-0.5">
+          <div className="flex items-center bg-white/10 rounded-lg p-0.5">
             <button
               type="button"
               onClick={() => setDeviceMode("phone")}
@@ -118,11 +161,11 @@ export function MobileShell({
       <div
         className={`w-full transition-all duration-200 ${
           deviceMode === "phone"
-            ? "max-w-[420px] my-0 md:my-6 md:rounded-[36px] md:shadow-2xl md:ring-1 md:ring-black/10 overflow-hidden"
+            ? "max-w-full md:max-w-[420px] my-0 md:my-6 md:rounded-[36px] md:shadow-2xl md:ring-1 md:ring-black/10 overflow-hidden"
             : "max-w-4xl my-0 md:my-6 md:rounded-2xl shadow-sm"
-        } bg-[#F8F6F1] flex flex-col min-h-screen md:min-h-[844px] relative`}
+        } bg-[#F8F6F1] flex flex-col min-h-screen relative`}
       >
-        {/* iOS style status bar indicator on mobile frame */}
+        {/* iOS style status bar indicator on desktop mobile frame */}
         <div className="hidden md:flex items-center justify-between px-6 pt-3 pb-1 text-[11px] font-bold text-[#242720] select-none">
           <span>9:41</span>
           <div className="w-20 h-4 bg-black/10 rounded-full mx-auto" />
@@ -135,13 +178,17 @@ export function MobileShell({
         </div>
 
         {/* Page Content */}
-        <main className={`flex-1 flex flex-col ${showBottomNav ? "pb-20" : ""} ${className}`}>
+        <main id="main-content" tabIndex={-1} className={`flex-1 flex flex-col outline-hidden ${showBottomNav ? "pb-16" : ""} ${className}`}>
           {children}
         </main>
 
         {/* Mobile Bottom Navigation */}
         {showBottomNav && (
-          <BottomNav savedCount={savedCount} appliedCount={appliedCount} />
+          <BottomNav
+            savedCount={liveSavedCount}
+            appliedCount={liveAppliedCount}
+            fluid={deviceMode === "fluid"}
+          />
         )}
       </div>
     </div>
