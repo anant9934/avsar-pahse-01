@@ -1,0 +1,50 @@
+name: Avsar CI Quality Gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Test, Lint, Typecheck & Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x, 22.x]
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Install Clean Dependencies
+        run: npm ci
+
+      - name: Execute Test Suite
+        run: npm test
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Verify TypeScript Types
+        run: npx tsc --noEmit
+
+      - name: Verify Production Next.js Build
+        run: npm run build
+        env:
+          NODE_ENV: production
+          NEXT_TELEMETRY_DISABLED: "1"
+
+      - name: Dependency Security Audit
+        run: npm audit --audit-level=high
