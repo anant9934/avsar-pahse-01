@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getApplicationRepository } from "@/lib/repository";
+import { getApplicationRepository, getJobRepository, getResumeRepository } from "@/lib/repository";
 import { getAuthenticatedCandidate } from "@/lib/auth/session";
 import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
 
@@ -47,6 +47,28 @@ export async function POST(request: NextRequest) {
 
     if (!jobId) {
       return NextResponse.json({ error: "Job ID is required" }, { status: 400 });
+    }
+
+    // Verify target job exists
+    const jobRepo = getJobRepository();
+    const targetJob = await jobRepo.getById(jobId);
+    if (!targetJob) {
+      return NextResponse.json(
+        { error: `Job opportunity "${jobId}" was not found or is no longer accepting applications.` },
+        { status: 404 }
+      );
+    }
+
+    // Verify candidate ownership of attached resume if specified
+    if (resumeId) {
+      const resumeRepo = getResumeRepository();
+      const targetResume = await resumeRepo.getById(resumeId);
+      if (targetResume && targetResume.candidateId !== auth.candidateId) {
+        return NextResponse.json(
+          { error: "Forbidden: You cannot attach a resume belonging to another candidate." },
+          { status: 403 }
+        );
+      }
     }
 
     // Always resolve candidate ID from verified server session, never trusting client payload
