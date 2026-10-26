@@ -52,6 +52,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "jobId is required" }, { status: 400 });
     }
 
+    const jobRepo = getJobRepository();
+    const job = await jobRepo.getById(jobId);
+    if (!job) {
+      return NextResponse.json(
+        { error: `Job opportunity "${jobId}" was not found or is no longer active.` },
+        { status: 404 }
+      );
+    }
+
     const savedRepo = getSavedJobRepository();
     const result = await savedRepo.toggle(auth.candidateId, jobId);
     return NextResponse.json(result);
