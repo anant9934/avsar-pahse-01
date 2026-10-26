@@ -7,8 +7,12 @@ import {
   signSessionPayload,
 } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { enforceRateLimit } from "@/lib/ratelimit";
 
 export async function GET(request: NextRequest) {
+  const rateLimitResponse = await enforceRateLimit(request);
+  if (rateLimitResponse) return rateLimitResponse as NextResponse;
+
   const searchParams = request.nextUrl.searchParams;
   const demo = searchParams.get("demo");
   const provider = searchParams.get("provider") as "google" | "email" | null;
