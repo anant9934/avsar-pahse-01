@@ -229,6 +229,41 @@ function ApplicationFlowContent({
               </div>
             </div>
 
+            {job?.isPossiblyClosed && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-900 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="block font-bold">Applications Closed for this Role</strong>
+                  <span>
+                    Source metadata indicates this role is no longer accepting new applications. Applications cannot be submitted.
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {job?.isExternalApplication && job?.applyUrl && (
+              <div className="p-3.5 bg-[#EAF4EB] border border-[#CDE5D0] rounded-xl text-xs text-[#242720] space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-[#285C45]">{job.applicationLinkType || "External Application"}</span>
+                  <span className="text-[11px] bg-white border border-[#CDE5D0] px-2 py-0.5 rounded-full text-[#285C45] font-semibold">
+                    Leaves Avsar
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#55564F]">
+                  This role accepts applications directly on the host employer or partner channel.
+                </p>
+                <a
+                  href={job.applyUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#285C45] hover:underline"
+                >
+                  <span>Open External Application Portal</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            )}
+
             {job && (
               <div className="card-surface p-4 bg-white mt-auto">
                 <span className="text-[11px] font-bold uppercase text-[#77786F] block mb-1">
@@ -255,6 +290,7 @@ function ApplicationFlowContent({
                 type="file"
                 accept=".pdf,.doc,.docx"
                 onChange={handleFileUpload}
+                aria-label="Upload resume file (PDF, DOC, or DOCX up to 5 megabytes)"
                 className="hidden"
               />
 
@@ -470,25 +506,36 @@ function ApplicationFlowContent({
         )}
 
         {/* Bottom Sticky Action */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#ECEAE3] max-w-md mx-auto px-4 py-3">
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#ECEAE3] max-w-md mx-auto px-4 py-3 safe-area-bottom">
           {currentStep < 4 ? (
             <button
               type="button"
               onClick={() => setCurrentStep((prev) => prev + 1)}
-              className="w-full bg-[#285C45] hover:bg-[#1E4735] text-white font-bold py-3.5 px-6 rounded-full flex items-center justify-center gap-2 text-sm shadow-sm transition-all group"
+              disabled={Boolean(job?.isPossiblyClosed)}
+              className="w-full bg-[#285C45] hover:bg-[#1E4735] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 px-6 rounded-full flex items-center justify-center gap-2 text-sm shadow-sm transition-all group"
             >
-              <span>Continue</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <span>{job?.isPossiblyClosed ? "Listing is Closed" : "Continue"}</span>
+              {!job?.isPossiblyClosed && (
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              )}
             </button>
           ) : (
             <button
               type="button"
               onClick={handleSubmitApplication}
-              disabled={submitting}
-              className="w-full bg-[#285C45] hover:bg-[#1E4735] disabled:opacity-75 text-white font-bold py-3.5 px-6 rounded-full flex items-center justify-center gap-2 text-sm shadow-sm transition-all group"
+              disabled={submitting || Boolean(job?.isPossiblyClosed)}
+              className="w-full bg-[#285C45] hover:bg-[#1E4735] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 px-6 rounded-full flex items-center justify-center gap-2 text-sm shadow-sm transition-all group"
             >
-              <span>{submitting ? "Submitting Application..." : "Submit Application"}</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <span>
+                {job?.isPossiblyClosed
+                  ? "Listing is Closed"
+                  : submitting
+                  ? "Submitting Application..."
+                  : "Submit Application"}
+              </span>
+              {!job?.isPossiblyClosed && (
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              )}
             </button>
           )}
         </div>
