@@ -4,6 +4,7 @@ import { slugify, generateStableJobId } from "./slugs.ts";
 import { normalizeCompanyLogoKey } from "./logos.ts";
 import { formatCompensation } from "./salary.ts";
 import { formatDeadline, isDeadlineExpired } from "./deadlines.ts";
+import { sanitizeExternalUrl } from "../auth/url-sanitizer.ts";
 
 export {
   parseMultiJsonBlocks,
@@ -78,14 +79,17 @@ export function normalizeJobRecord(
     typeof raw.currency === "string" ? raw.currency : "INR"
   );
 
-  // Application link & type
+  // Application link & type (strictly sanitized against script/data schemes)
   let applyUrl: string | undefined = undefined;
   if (typeof raw.apply_url === "string" && raw.apply_url.trim()) {
-    applyUrl = raw.apply_url.trim();
+    const clean = sanitizeExternalUrl(raw.apply_url);
+    if (clean) applyUrl = clean;
   } else if (typeof raw.application_url === "string" && raw.application_url.trim()) {
-    applyUrl = raw.application_url.trim();
+    const clean = sanitizeExternalUrl(raw.application_url);
+    if (clean) applyUrl = clean;
   } else if (typeof raw.recruiter_email === "string" && raw.recruiter_email.trim()) {
-    applyUrl = `mailto:${raw.recruiter_email.trim()}`;
+    const clean = sanitizeExternalUrl(`mailto:${raw.recruiter_email.trim()}`);
+    if (clean) applyUrl = clean;
   }
 
   const isExternalApplication = Boolean(applyUrl && !applyUrl.includes("avsar.app"));
