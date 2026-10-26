@@ -16,7 +16,7 @@ describe("PostgreSQL Connection Lifecycle & Lease Management", () => {
     let connectCount = 0;
 
     const mockClient = {
-      query: async (sql, params) => ({ rows: [], rowCount: 0 }),
+      query: async () => ({ rows: [], rowCount: 0 }),
       release: () => {
         releaseCount++;
       },
@@ -39,7 +39,7 @@ describe("PostgreSQL Connection Lifecycle & Lease Management", () => {
   it("successfully acquires connection, executes operation, and releases client", async () => {
     const { mockPool } = createMockPool();
 
-    const result = await withConnectionLease(mockPool, async (client) => {
+    const result = await withConnectionLease(mockPool, async () => {
       assert.equal(getActiveLeaseCount(), 1);
       return "SUCCESS_DATA";
     });
