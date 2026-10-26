@@ -112,3 +112,88 @@ export async function GET(
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params;
+    const resumeRepo = getResumeRepository();
+    const resume = await resumeRepo.getById(id);
+
+    if (!resume) {
+      return NextResponse.json({ error: "Resume not found" }, { status: 404 });
+    }
+
+    // Resolve authenticated candidate and admin privileges on server
+    const auth = getAuthenticatedCandidate(request);
+    const adminCheck = checkAdminAuth(request);
+
+    if ((!auth || !auth.authenticated) && !adminCheck.authorized) {
+      return NextResponse.json(
+        { error: "Unauthorized: Authentication required to delete resume." },
+        { status: 401 }
+      );
+    }
+
+    // Prevent Horizontal Privilege Escalation: Candidate A cannot delete Candidate B's resume
+    const isOwner = auth && auth.candidateId === resume.candidateId;
+    const isAdmin = adminCheck.authorized;
+
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json(
+        { error: "Forbidden: You do not have permission to delete another candidate's resume." },
+        { status: 403 }
+      );
+    }
+
+    // 1. Delete physical object from cloud object storage if key exists
+    if (resume.storageKey) {
+      try {
+        const storage = getStorageProvider();
+        await storage.delete(resume.storageKey);
+      } catch (storageErr) {
+        console.warn(`[Resume Delete] Cloud storage object deletion failed (${resume.storageKey}):`, storageErr);
+      }
+    }
+
+    // 2. Delete local file if present and safely confined within data/resumes
+    if (resume.filePath && fs.existsSync(resume.filePath)) {
+      const storageDir = path.resolve(process.cwd(), "data", "resumes");
+      const targetPath = path.resolve(resume.filePath);
+      if (targetPath.startsWith(storageDir)) {
+        try {
+          fs.unlinkSync(targetPath);
+        } catch (fsErr) {
+          console.warn(`[Resume Delete] Local file unlink failed (${targetPath}):`, fsErr);
+        }
+      }
+    }
+
+    // 3. Delete record from repository
+    const deleted = await resumeRepo.delete(id, resume.candidateId);
+    if (!deleted) {
+      return NextResponse.json(
+        { error: "Failed to delete resume record from repository." },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Resume deleted successfully",
+      deletedId: id,
+    });
+  } catch (err: unknown) {
+    if (err instanceof DatabaseUnavailableError || err instanceof DatabaseConfigurationError) {
+      return NextResponse.json(
+        { error: "Database service temporarily unavailable. Please try again shortly." },
+        { status: 503 }
+      );
+    }
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}
+
