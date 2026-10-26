@@ -24,12 +24,13 @@
 | 11 | `ad27681` | `refactor(auth): add clock skew tolerance helper to session expiration validation` | `src/lib/auth/session.ts` | Export `isSessionExpired` helper supporting configurable leeway for multi-region clock drift | Unit tests in `test/unit/session-expiry.test.mjs` |
 | 12 | `1162cd2` | `test(auth): add unit tests for session expiration and clock skew tolerance` | `test/unit/session-expiry.test.mjs` | Assert expiration evaluation and clock skew leeway compliance | `node --test test/unit/session-expiry.test.mjs` |
 | 13 | `01d472a` | `fix(resumes): order magic bytes validation before storage quota evaluation in resumes API` | `src/app/api/resumes/route.ts` | Reject spoofed and malformed payloads at the binary validation gate prior to quota accounting | `node --test test/journeys.test.mjs` |
+| 14 | `e64c1e3` | `fix(data): purge historical test upload records from tracked seed database` | `data/db.json` | Clean duplicate test uploads while preserving 131 verified jobs and candidate seed data | `node --test test/journeys.test.mjs` |
 
 ---
 
 ## Ledger Summary
 
-- **Total Atomic Commits Recorded:** 13
+- **Total Atomic Commits Recorded:** 14
 - **One-File Atomicity Compliance:** 100% (each commit modifies exactly 1 tracked file)
 - **Author Identity:** Verified as `Anant Kumar <anant9934@users.noreply.github.com>` on every commit
 - **Verification Guarantee:** 100% of commits accompanied by green targeted automated unit/integration tests
