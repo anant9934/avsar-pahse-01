@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
+import { executeWithBreaker, CircuitBreakerOpenError } from "../circuit-breaker/index.ts";
 
 export interface AIUserProfile {
   sub: string; // Stable AI Tathastu user UUID (primary external identity key)
@@ -179,8 +180,9 @@ export async function exchangeCodeForProfile(
   const fetchFn = options?.customFetch || fetch;
 
   try {
-    const tokenUrl = new URL("/api/integrations/token", AUTH_CONFIG.issuer).toString();
-    const resp = await fetchFn(tokenUrl, {
+    return await executeWithBreaker("oauth_idp", async () => {
+      const tokenUrl = new URL("/api/integrations/token", AUTH_CONFIG.issuer).toString();
+      const resp = await fetchFn(tokenUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -276,7 +278,15 @@ export async function exchangeCodeForProfile(
           : undefined,
       },
     };
+    });
   } catch (err: unknown) {
+    if (err instanceof CircuitBreakerOpenError) {
+      return {
+        ok: false,
+        error: "AI Tathastu identity provider is temporarily unavailable. Please try again shortly.",
+        code: "idp_circuit_open",
+      };
+    }
     const message = err instanceof Error ? err.message : String(err);
     return { ok: false, error: `Authentication verification error: ${message}`, code: "internal_error" };
   }
