@@ -40,6 +40,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Enforce storage quota protection: max 5 resumes per candidate
+    const resumeRepo = getResumeRepository();
+    const existingResumes = await resumeRepo.listByCandidate(auth.candidateId);
+    if (existingResumes.length >= 5) {
+      return NextResponse.json(
+        {
+          error:
+            "Maximum resume upload limit reached (5 documents). Please delete an older resume before uploading a new one.",
+        },
+        { status: 400 }
+      );
+    }
+
     const contentType = request.headers.get("content-type") || "";
 
     if (contentType.includes("multipart/form-data")) {
@@ -96,7 +109,6 @@ export async function POST(request: NextRequest) {
       const sizeStr = (file.size / (1024 * 1024)).toFixed(1) + " MB";
 
       // Persist resume metadata in repository
-      const resumeRepo = getResumeRepository();
       const newResume = await resumeRepo.create(
         {
           candidateId: auth.candidateId,
@@ -115,7 +127,6 @@ export async function POST(request: NextRequest) {
 
     // JSON fallback
     const body = await request.json();
-    const resumeRepo = getResumeRepository();
     const newResume = await resumeRepo.create(
       {
         candidateId: auth.candidateId,
