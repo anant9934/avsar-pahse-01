@@ -46,9 +46,25 @@ Avsar has been audited and hardened according to OWASP Top 10 standards for web 
     - Standard API reads: Max 120 requests per minute per IP.
   - Standard headers returned: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `Retry-After`.
 
+### F. Health Endpoint & Secrets Disclosure
+- **Threat**: Disclosing database connection strings, credentials, or internal server paths via diagnostic endpoints.
+- **Defense**:
+  - The [`/api/health`](file:///Users/quantum/Desktop/avsar/src/app/api/health/route.ts) endpoint provides synthetic readiness metrics without exposing connection credentials, raw secrets, or unmasked database hostnames.
+  - Returns sanitized provider status (`postgres` or `file`), ping latency in ms, and SSO configuration readiness.
+
 ---
 
-## 2. Security Headers & Cookie Policy
+## 2. Cloud Storage Hardening & Private Objects
+
+When configured with S3-compatible cloud object storage (`STORAGE_PROVIDER=s3`):
+- **Private Buckets**: Buckets must block all public ACLs and public policies. Resumes are never served via public static URLs.
+- **Short-Lived Presigned Access**: Downloads use time-bound presigned URLs (expiring in 5 minutes) or authenticated streaming through the Next.js API route.
+- **Fail-Closed Configuration**: If `STORAGE_PROVIDER=s3` is specified without a valid bucket, the application throws an immediate configuration exception on boot, preventing data loss.
+- **Path Traversal Shield**: All storage keys are generated as cryptographically random UUIDs; candidate-supplied filenames are never used as storage keys.
+
+---
+
+## 3. Security Headers & Cookie Policy
 
 All responses set strict HTTP security headers:
 - `Content-Security-Policy`: Restricts script, style, and media origins.
@@ -59,7 +75,7 @@ All responses set strict HTTP security headers:
 
 ---
 
-## 3. Audit Logging & Compliance
+## 4. Audit Logging & Compliance
 
 In [`src/lib/auth/audit-logger.ts`](file:///Users/quantum/Desktop/avsar/src/lib/auth/audit-logger.ts), structured JSON audit logs capture:
 - **Timestamp** (ISO-8601 UTC)
@@ -67,3 +83,4 @@ In [`src/lib/auth/audit-logger.ts`](file:///Users/quantum/Desktop/avsar/src/lib/
 - **Actor Identity** (Candidate ID or Anonymous)
 - **Masked IP Address** (Preserves subnet privacy while maintaining abuse diagnostic utility)
 - **Target Resource** (Job ID, Application ID, Resume ID)
+

@@ -1,12 +1,12 @@
-# PostgreSQL Database Architecture & Migration Guide
+# PostgreSQL Database Architecture & Production Migration Runbook
 
 ## Overview
 
 Avsar features a production-grade dual persistence model:
-1. **PostgreSQL** (Primary Production Database): Uses connection pooling, normalized relations, and ACID transaction boundaries.
+1. **PostgreSQL** (Primary Production Database): Uses connection pooling (`pg.Pool`), normalized relations, strategic B-tree indexes, and ACID transaction boundaries.
 2. **File Repository** (Local & Edge Fallback): High-performance JSON-backed repository (`data/db.json`) enabling zero-configuration offline development and serverless portability.
 
-This document details the PostgreSQL schema design, connection pooling parameters, indexes, and the automated migration runner.
+This document details the schema architecture, connection pooling specifications, idempotent migration CLI, and the step-by-step production runbook.
 
 ---
 
@@ -80,12 +80,12 @@ Stores candidate bookmarked jobs:
 ## Connection Pooling & Performance
 
 PostgreSQL connections are managed via `pg.Pool` in [`src/lib/db/postgres.ts`](file:///Users/quantum/Desktop/avsar/src/lib/db/postgres.ts):
-- **Max Connections**: `20`
-- **Idle Timeout**: `30,000 ms`
-- **Connection Timeout**: `5,000 ms`
+- **Max Connections**: `20` (Configurable via `DB_POOL_MAX`)
+- **Idle Timeout**: `30,000 ms` (Configurable via `DB_POOL_IDLE_TIMEOUT_MS`)
+- **Connection Timeout**: `5,000 ms` (Configurable via `DB_POOL_CONNECTION_TIMEOUT_MS`)
 - **Keep-Alive**: Enabled with 10-second initial delay.
 
-### Strategic Indexes
+### Strategic B-Tree Indexes
 - `idx_jobs_slug` ON `jobs(slug)`
 - `idx_jobs_verified` ON `jobs(verified)`
 - `idx_applications_candidate` ON `applications(candidate_id)`
@@ -94,20 +94,56 @@ PostgreSQL connections are managed via `pg.Pool` in [`src/lib/db/postgres.ts`](f
 
 ---
 
-## Migration Runner (`scripts/migrate-to-postgres.mjs`)
+## Production Migration Runbook
 
-Avsar includes an automated, idempotent migration CLI:
+Follow these exact steps when deploying to a cloud-managed PostgreSQL instance (Neon, Supabase, AWS RDS, GCP Cloud SQL).
+
+### Step 1: Pre-flight Dry Run
+Run dry-run validation to verify schema parsing and source dataset integrity without touching the database:
 
 ```bash
-# Dry-run validation (checks schema, parses data/db.json, verifies constraints without writing)
 node scripts/migrate-to-postgres.mjs --dry-run
+```
+*Expected Output: Confirms candidate count (1), total jobs (131), verified jobs (48), and creates a recovery backup.*
 
-# Live execution
-DATABASE_URL="postgres://user:password@localhost:5432/avsar" node scripts/migrate-to-postgres.mjs
+### Step 2: Configure Environment
+Set `DATABASE_URL` with SSL mode enabled:
+
+```bash
+export DATABASE_URL="postgresql://avsar_admin:your_secure_password@ep-example-pooler.ap-southeast-1.aws.neon.tech/avsar?sslmode=require"
 ```
 
-### Safety Features
-1. **Transaction Wrapped**: All operations execute within a single transaction block (`BEGIN ... COMMIT`).
-2. **Schema Validation**: Automatically creates missing tables and indexes if they do not exist (`CREATE TABLE IF NOT EXISTS`).
-3. **Backup Guarantee**: Creates a timestamped snapshot of `data/db.json` before initiating live transfers.
-4. **Conflict Resolution**: Uses `ON CONFLICT DO UPDATE` to safely handle re-runs without data loss.
+### Step 3: Execute Live Migration
+Execute the migration script:
+
+```bash
+node scripts/migrate-to-postgres.mjs
+```
+
+### Step 4: Verification Queries
+Verify row counts and constraints directly in `psql`:
+
+```sql
+-- 1. Verify Job Count (Must match source total: 131)
+SELECT COUNT(*) AS total_jobs FROM jobs;
+
+-- 2. Verify Verified Listings (Must be 48)
+SELECT COUNT(*) AS verified_jobs FROM jobs WHERE verified = TRUE;
+
+-- 3. Verify Candidate Profiles
+SELECT COUNT(*) AS total_candidates FROM candidates;
+
+-- 4. Verify Active Applications
+SELECT COUNT(*) AS total_applications FROM applications;
+
+-- 5. Test Uniqueness Constraint (Should throw duplicate key error)
+-- INSERT INTO saved_jobs (candidate_id, job_id) VALUES ('cand_rohan_sharma_001', 'job_flipkart_da');
+```
+
+### Step 5: Rollback & Recovery Procedures
+- **Transaction Rollback**: If any individual statement fails during migration execution, the script automatically triggers `ROLLBACK` and restores the database to its pristine pre-migration state.
+- **Source Snapshot**: The migration CLI automatically writes a timestamped JSON snapshot before executing: `data/db.json.migration-backup-<timestamp>.json`.
+- **Manual Restore**: In the event of an unforeseen data conflict, the file repository can be immediately restored via:
+  ```bash
+  cp data/db.json.migration-backup-*.json data/db.json
+  ```

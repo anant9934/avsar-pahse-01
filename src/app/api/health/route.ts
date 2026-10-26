@@ -13,6 +13,7 @@ export async function GET() {
     status: "healthy" | "degraded" | "unhealthy";
     type: "postgres" | "local_file";
     latencyMs?: number;
+    recordCount?: number;
     error?: string;
   };
 
@@ -30,6 +31,7 @@ export async function GET() {
       databaseStatus = {
         status: process.env.NODE_ENV === "production" ? "degraded" : "healthy",
         type: "local_file",
+        recordCount: jobCount,
         error:
           process.env.NODE_ENV === "production"
             ? "Running on file repository fallback. DATABASE_URL required for multi-instance production."
@@ -55,7 +57,7 @@ export async function GET() {
       provider: storage.name,
       status: "healthy",
     };
-  } catch (err) {
+  } catch {
     storageStatus = {
       provider: process.env.STORAGE_PROVIDER || "unknown",
       status: "unhealthy",

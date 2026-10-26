@@ -44,12 +44,15 @@ Avsar is a production-grade career platform engineered for Indian tech talent an
   +------------------------------+             +-------------------------------+
 ```
 
+---
+
 ## Core Subsystems
 
 ### 1. Presentation Layer
 - **Mobile-First Responsive Framework**: Custom `MobileShell` enforcing standard 390px/420px mobile viewport on desktop or fluid responsive expansion.
 - **Visual Design Identity**: Warm ivory surfaces (`#F8F6F1`, `#EDEAE3`), forest green primary brand accent (`#285C45`), dark charcoal typography (`#242720`).
 - **Accessibility**: Minimum 44px WCAG touch targets, focus-visible outlines, skip-to-content links, `prefers-reduced-motion` animations.
+- **Server Pre-Rendering (SSR)**: Core job detail and match analysis pages utilize async Server Components with instant server pre-rendering, eliminating client loading layout shifts.
 
 ### 2. Matching Engine
 The matching engine is deterministic and reproducible across arbitrary consecutive runs:
@@ -62,4 +65,11 @@ The matching engine is deterministic and reproducible across arbitrary consecuti
 - **OAuth 2.0 PKCE**: RFC 7636 code verifier and S256 challenge generation.
 - **Session Tokens**: Cryptographically signed HMAC-SHA256 tokens stored in HTTP-only, secure, `SameSite=Lax` cookies.
 - **Open Redirect Guard**: Strict same-origin relative path validation rejecting external hosts, protocol-relative paths (`//`), backslashes (`\`), and CRLF injections.
-- **Candidate Data Isolation**: Every candidate-owned entity (bookmarks, resumes, applications) is strictly verified against the authenticated user ID on the server.
+- **Candidate Data Isolation**: Every candidate-owned entity (bookmarks, resumes, applications) is strictly verified against the authenticated user ID on the server (BOLA/IDOR defense).
+- **Magic Bytes Validation**: Binary signature verification prevents disguised executables from being accepted as resumes.
+
+### 4. Health, Diagnostics & Deployment Infrastructure
+- **`/api/health`**: Comprehensive health and readiness check probe returning uptime, database status, storage provider, and IdP readiness without leaking secrets.
+- **Fail-Closed Production Safety**: In production mode (`NODE_ENV=production`), missing `DATABASE_URL` or S3 credentials immediately triggers configuration errors, preventing silent fallback to ephemeral file storage.
+- **Connection Pooling**: Managed `pg.Pool` with bounded 30s idle timeout and 5s connection acquisition limit.
+- **S3 Presigned Access**: Resumes in cloud object storage are accessed via short-lived (5-minute) presigned URLs or authenticated reverse proxy streams.

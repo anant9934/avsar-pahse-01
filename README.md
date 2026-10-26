@@ -72,7 +72,7 @@ avsar/
 │   │   ├── repository/             # Dual repository pattern implementation (Postgres & File)
 │   │   └── storage/                # Magic bytes validator and multi-provider resume storage
 │   └── types/                      # Strictly typed domain models (Job, Candidate, Application, etc.)
-└── test/                           # Automated Test Suite (64/64 passing)
+└── test/                           # Automated Test Suite (66/66 passing)
     ├── *.test.mjs                  # Integration test suites for critical candidate journeys
     └── unit/*.test.mjs             # Unit test suites for matching, storage, and security
 ```
@@ -122,7 +122,7 @@ Navigate to [http://localhost:3000](http://localhost:3000) to access Avsar.
 Avsar maintains a comprehensive test suite covering unit calculations, security boundaries, and full end-to-end user journeys:
 
 ```bash
-# Run all 64 automated test suites
+# Run all 66 automated test suites
 npm test
 
 # Run code style and ESLint verification
@@ -139,6 +139,7 @@ npm run build
 - ✅ **Integration Journeys**: Authentication, job discovery, private resume upload, application submission, duplicate prevention, and admin metrics.
 - ✅ **Deterministic Matching**: Exact skill overlap scoring, graduation year eligibility gating, and experience bracket evaluation.
 - ✅ **Security Mitigations**: Magic bytes file upload validation, BOLA prevention, timing attack resistance, and rate limiting.
+- ✅ **Health & Readiness**: Synthetic diagnostics probe (`/api/health`) verifying database connectivity, storage mode, and SSO readiness.
 
 ---
 
