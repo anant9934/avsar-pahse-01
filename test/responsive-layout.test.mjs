@@ -16,14 +16,14 @@ test("Responsive Shell & Layout Verification", async (t) => {
     // Must default to fluid responsive mode
     assert.match(
       content,
-      /useState<"phone"\s*\|\s*"fluid">\("fluid"\)/,
+      /return\s+"fluid";/,
       "MobileShell must initialize deviceMode to 'fluid' by default"
     );
 
     // Demo suite bar must be hidden by default
     assert.match(
       content,
-      /useState\(false\)/,
+      /return\s+false;/,
       "showSuiteBar must default to false"
     );
     assert.match(
