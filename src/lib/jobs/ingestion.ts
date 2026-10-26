@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { db } from "@/lib/db";
-import { extractAllJobsFromDataset } from "./normalization";
+import { extractAllJobsFromDataset } from "./normalization.ts";
+import { createJobBatchKey } from "./deduplication.ts";
 import type { Job } from "@/types";
 
 export interface IngestionOptions {
