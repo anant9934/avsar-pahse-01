@@ -1,5 +1,5 @@
 import type { JobHandler } from "../types.ts";
-import { getAuditRepository } from "@/lib/repository";
+import { getAuditRepository } from "../../repository/index.ts";
 
 export interface AuditLogJobPayload {
   actorType: "admin" | "candidate" | "system";
