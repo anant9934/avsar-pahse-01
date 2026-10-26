@@ -133,6 +133,14 @@ test("Unified Cache Manager: functional export helpers operate on singleton inst
   await cacheSet("global:test", 100);
   assert.equal(await cacheGet("global:test"), 100);
 
+  const orSetValue = await cacheGetOrSet("global:lazy", async () => 200, { tags: ["lazy-tag"] });
+  assert.equal(orSetValue, 200);
+  assert.equal(await cacheGet("global:lazy"), 200);
+
+  const purgedCount = await cachePurgeTag("lazy-tag");
+  assert.equal(purgedCount, 1);
+  assert.equal(await cacheGet("global:lazy"), null);
+
   const deleted = await cacheDelete("global:test");
   assert.equal(deleted, true);
   assert.equal(await cacheGet("global:test"), null);
