@@ -3,6 +3,11 @@ import { getApplicationRepository, getJobRepository, getResumeRepository } from 
 import { getAuthenticatedCandidate } from "@/lib/auth/session";
 import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
 import { enforceRateLimit } from "@/lib/ratelimit";
+import {
+  withIdempotency,
+  IdempotencyConflictError,
+  IdempotencyMismatchError,
+} from "@/lib/idempotency";
 
 export async function GET(request: NextRequest) {
   try {
@@ -46,6 +51,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const idempotencyKey =
+      request.headers.get("idempotency-key") ||
+      request.headers.get("x-idempotency-key");
+
     const body = await request.json();
     const { jobId, resumeId, answers } = body;
 
@@ -81,27 +90,66 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Always resolve candidate ID from verified server session, never trusting client payload
+    // Execute application submission protected by idempotency framework
     const appRepo = getApplicationRepository();
-    const result = await appRepo.submit({
+    const payload = {
       jobId,
       resumeId: resumeId || "res_1",
       answers: answers || {},
       candidateId: auth.candidateId,
+    };
+
+    const result = await withIdempotency<{
+      success?: boolean;
+      error?: string;
+      application?: unknown;
+    }>({
+      key: idempotencyKey,
+      scope: "application_submission",
+      payload,
+      candidateId: auth.candidateId,
+      operation: async () => {
+        const submission = await appRepo.submit(payload);
+
+        if (!submission.success) {
+          return {
+            status: 409,
+            body: { error: submission.error, application: submission.application },
+          };
+        }
+
+        return {
+          status: 200,
+          body: {
+            success: true,
+            application: submission.application,
+          },
+        };
+      },
     });
 
-    if (!result.success) {
+    const headers: Record<string, string> = {};
+    if (result.replayed) {
+      headers["X-Idempotent-Replay"] = "true";
+    }
+
+    return NextResponse.json(result.body, {
+      status: result.status,
+      headers,
+    });
+  } catch (err: unknown) {
+    if (err instanceof IdempotencyConflictError) {
       return NextResponse.json(
-        { error: result.error, application: result.application },
+        { error: "A submission with this Idempotency-Key is currently in progress. Please retry after a moment." },
         { status: 409 }
       );
     }
-
-    return NextResponse.json({
-      success: true,
-      application: result.application,
-    });
-  } catch (err: unknown) {
+    if (err instanceof IdempotencyMismatchError) {
+      return NextResponse.json(
+        { error: "Idempotency-Key was previously used with a different application payload." },
+        { status: 422 }
+      );
+    }
     if (err instanceof DatabaseUnavailableError || err instanceof DatabaseConfigurationError) {
       return NextResponse.json(
         { error: "Database service temporarily unavailable. Please try again shortly." },
