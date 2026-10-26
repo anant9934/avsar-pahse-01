@@ -186,93 +186,145 @@ export function MobileShell({
       {/* Production Desktop Top Navigation (Visible on desktop/tablets when not explicitly hidden) */}
       {!hideDesktopNav && deviceMode === "fluid" && (
         <header className="hidden md:flex w-full bg-[#F8F6F1]/95 backdrop-blur-md border-b border-[#ECEAE3] sticky top-0 z-40 px-6 lg:px-10 py-3 items-center justify-between shadow-2xs">
-          <div className="flex items-center gap-8">
-            <AvsarLogo size="sm" showTagline={true} href="/home" />
+          {pathname === "/" || pathname === "/welcome" ? (
+            /* Unauthenticated Landing Page Navigation */
+            <>
+              <div className="flex items-center gap-8">
+                <AvsarLogo size="sm" showTagline={true} href="/" />
 
-            <nav className="flex items-center gap-1" aria-label="Desktop Primary Navigation">
-              <Link
-                href="/home"
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
-                  pathname === "/home" || pathname === "/"
-                    ? "bg-[#285C45] text-white shadow-2xs"
-                    : "text-[#55564F] hover:text-[#242720] hover:bg-[#EFECE5]"
-                }`}
-              >
-                <Home className="w-3.5 h-3.5" />
-                Home
-              </Link>
-              <Link
-                href="/explore"
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
-                  pathname.startsWith("/explore") || (pathname.startsWith("/jobs") && !pathname.includes("/apply"))
-                    ? "bg-[#285C45] text-white shadow-2xs"
-                    : "text-[#55564F] hover:text-[#242720] hover:bg-[#EFECE5]"
-                }`}
-              >
-                <Compass className="w-3.5 h-3.5" />
-                Explore
-              </Link>
-              <Link
-                href="/saved"
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 relative ${
-                  pathname.startsWith("/saved")
-                    ? "bg-[#285C45] text-white shadow-2xs"
-                    : "text-[#55564F] hover:text-[#242720] hover:bg-[#EFECE5]"
-                }`}
-              >
-                <Bookmark className="w-3.5 h-3.5" />
-                Saved
-                {liveSavedCount !== undefined && liveSavedCount > 0 && (
-                  <span className="ml-1 px-1.5 py-0.2 bg-[#285C45] text-white rounded-full text-[10px] font-bold">
-                    {liveSavedCount}
-                  </span>
-                )}
-              </Link>
-              <Link
-                href="/applications"
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 relative ${
-                  pathname.startsWith("/applications") || pathname.includes("/apply")
-                    ? "bg-[#285C45] text-white shadow-2xs"
-                    : "text-[#55564F] hover:text-[#242720] hover:bg-[#EFECE5]"
-                }`}
-              >
-                <ClipboardCheck className="w-3.5 h-3.5" />
-                Applications
-                {liveAppliedCount !== undefined && liveAppliedCount > 0 && (
-                  <span className="ml-1 px-1.5 py-0.2 bg-[#285C45] text-white rounded-full text-[10px] font-bold">
-                    {liveAppliedCount}
-                  </span>
-                )}
-              </Link>
-              <Link
-                href="/profile"
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
-                  pathname.startsWith("/profile")
-                    ? "bg-[#285C45] text-white shadow-2xs"
-                    : "text-[#55564F] hover:text-[#242720] hover:bg-[#EFECE5]"
-                }`}
-              >
-                <User className="w-3.5 h-3.5" />
-                Profile
-              </Link>
-            </nav>
-          </div>
+                <nav className="flex items-center gap-1.5" aria-label="Landing Page Navigation">
+                  <Link
+                    href="/explore"
+                    className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[#55564F] hover:text-[#242720] hover:bg-[#EFECE5] transition-colors"
+                  >
+                    Explore Roles
+                  </Link>
+                  <a
+                    href="#how-it-works"
+                    className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[#55564F] hover:text-[#242720] hover:bg-[#EFECE5] transition-colors"
+                  >
+                    How It Works
+                  </a>
+                  <a
+                    href="#for-employers"
+                    className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[#55564F] hover:text-[#242720] hover:bg-[#EFECE5] transition-colors"
+                  >
+                    For Employers
+                  </a>
+                </nav>
+              </div>
 
-          <div className="flex items-center gap-3">
-            <Link
-              href="/admin"
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-[#285C45] bg-[#EAF4EB] hover:bg-[#DFEDE1] transition-colors"
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Admin Portal
-            </Link>
-            <Link
-              href="/auth"
-              className="px-4 py-1.5 rounded-full text-xs font-bold text-white bg-[#285C45] hover:bg-[#1E4735] transition-colors shadow-2xs"
-            >
-              Sign In
-            </Link>
-          </div>
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/auth"
+                  className="px-4 py-1.5 rounded-full text-xs font-bold text-[#285C45] hover:bg-[#EAF4EB] transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/auth"
+                  className="px-4 py-1.5 rounded-full text-xs font-bold text-white bg-[#285C45] hover:bg-[#1E4735] transition-colors shadow-2xs"
+                >
+                  Get Started
+                </Link>
+              </div>
+            </>
+          ) : (
+            /* Authenticated Candidate Dashboard Navigation */
+            <>
+              <div className="flex items-center gap-8">
+                <AvsarLogo size="sm" showTagline={true} href="/home" />
+
+                <nav className="flex items-center gap-1" aria-label="Desktop Primary Navigation">
+                  <Link
+                    href="/home"
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                      pathname === "/home"
+                        ? "bg-[#285C45] text-white shadow-2xs"
+                        : "text-[#55564F] hover:text-[#242720] hover:bg-[#EFECE5]"
+                    }`}
+                  >
+                    <Home className="w-3.5 h-3.5" />
+                    Home
+                  </Link>
+                  <Link
+                    href="/explore"
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                      pathname.startsWith("/explore") || (pathname.startsWith("/jobs") && !pathname.includes("/apply"))
+                        ? "bg-[#285C45] text-white shadow-2xs"
+                        : "text-[#55564F] hover:text-[#242720] hover:bg-[#EFECE5]"
+                    }`}
+                  >
+                    <Compass className="w-3.5 h-3.5" />
+                    Explore
+                  </Link>
+                  <Link
+                    href="/saved"
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 relative ${
+                      pathname.startsWith("/saved")
+                        ? "bg-[#285C45] text-white shadow-2xs"
+                        : "text-[#55564F] hover:text-[#242720] hover:bg-[#EFECE5]"
+                    }`}
+                  >
+                    <Bookmark className="w-3.5 h-3.5" />
+                    Saved
+                    {liveSavedCount !== undefined && liveSavedCount > 0 && (
+                      <span className="ml-1 px-1.5 py-0.2 bg-[#285C45] text-white rounded-full text-[10px] font-bold">
+                        {liveSavedCount}
+                      </span>
+                    )}
+                  </Link>
+                  <Link
+                    href="/applications"
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 relative ${
+                      pathname.startsWith("/applications") || pathname.includes("/apply")
+                        ? "bg-[#285C45] text-white shadow-2xs"
+                        : "text-[#55564F] hover:text-[#242720] hover:bg-[#EFECE5]"
+                    }`}
+                  >
+                    <ClipboardCheck className="w-3.5 h-3.5" />
+                    Applications
+                    {liveAppliedCount !== undefined && liveAppliedCount > 0 && (
+                      <span className="ml-1 px-1.5 py-0.2 bg-[#285C45] text-white rounded-full text-[10px] font-bold">
+                        {liveAppliedCount}
+                      </span>
+                    )}
+                  </Link>
+                  <Link
+                    href="/profile"
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                      pathname.startsWith("/profile")
+                        ? "bg-[#285C45] text-white shadow-2xs"
+                        : "text-[#55564F] hover:text-[#242720] hover:bg-[#EFECE5]"
+                    }`}
+                  >
+                    <User className="w-3.5 h-3.5" />
+                    Profile
+                  </Link>
+                </nav>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/explore"
+                  className="hidden lg:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-[#285C45] bg-[#EAF4EB] hover:bg-[#DFEDE1] transition-colors"
+                >
+                  <Compass className="w-3.5 h-3.5" />
+                  Browse 130+ Jobs
+                </Link>
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-2 px-3 py-1 rounded-full border border-[#ECEAE3] bg-white hover:border-[#D0CDC2] transition-colors shadow-2xs"
+                  aria-label="View Candidate Profile"
+                >
+                  <div className="w-5 h-5 rounded-full bg-[#285C45] text-white flex items-center justify-center text-[10px] font-bold">
+                    R
+                  </div>
+                  <span className="text-xs font-semibold text-[#242720]">Rohan</span>
+                </Link>
+              </div>
+            </>
+          )}
         </header>
       )}
 
@@ -281,7 +333,7 @@ export function MobileShell({
         className={`w-full transition-all duration-200 ${
           deviceMode === "phone"
             ? "max-w-full md:max-w-[420px] my-0 md:my-6 md:rounded-[36px] md:shadow-2xl md:ring-1 md:ring-black/10 overflow-hidden bg-[#F8F6F1]"
-            : "max-w-5xl mx-auto px-0 md:px-4 lg:px-6"
+            : "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
         } flex flex-col min-h-screen relative`}
       >
         {/* iOS style status bar indicator ONLY when explicitly in phone emulator frame mode */}
