@@ -40,11 +40,20 @@
 | 26 | `19574f0` | `fix(apply): populate portfolio url and candidate details dynamically in application flow` | `src/app/jobs/[id]/apply/page.tsx` | Dynamically initialize form and review step from authenticated candidate profile | UI form testing & `npx tsc` |
 | 27 | `e8bbba3` | `docs(qa): update defect inventory with resolved statuses and verified commit shas` | `docs/PRODUCTION_DEFECT_REGISTER.md` | Record resolution milestones and verified commit SHAs in production register | Defect register verification |
 
+| 28 | `bae2f4b` | `feat(db): enhance postgres connection configuration with neon serverless and pooling support` | `src/lib/db/postgres.ts` | Add Neon detection, pooled endpoint validation, masking, and telemetry metadata | Unit tests in `test/neon-postgres.test.mjs` |
+| 29 | `b3724bb` | `test(db): add regression tests for neon connection detection, pooling, and configuration validation` | `test/neon-postgres.test.mjs` | Cover Neon detection, pooling mode, masking, and transaction rollback | `node --test test/neon-postgres.test.mjs` |
+| 30 | `313a32a` | `fix(health): enforce strict database readiness and reject local fallback in production health check` | `src/app/api/health/route.ts` | Report HTTP 503 unhealthy when DATABASE_URL missing in production | Health endpoint verification |
+| 31 | `ea753a8` | `fix(repository): reject silent local json fallback in production repository factory` | `src/lib/repository/index.ts` | Export getActiveRepositoryProvider and enforce strict PostgreSQL repository selection | Repository factory validation |
+| 32 | `8b13cdd` | `docs(env): update environment template with neon serverless pooling specifications` | `.env.example` | Detail Neon pooled endpoint format and pool sizing parameters | Environment specification review |
+| 33 | `8705006` | `docs(neon): create neon serverless postgresql setup and operational runbook` | `docs/NEON_SETUP.md` | Author complete setup, provisioning, migration, verification, and recovery runbook | Runbook peer review |
+| 34 | `74f0703` | `docs(schema): create comprehensive relational database schema documentation` | `docs/DATABASE_SCHEMA.md` | Document all 8 normalized tables, constraints, indexes, and relations | Schema documentation review |
+| 35 | `63d2fa3` | `docs(migration): document neon serverless migration runbook and verification procedures` | `docs/DATABASE_MIGRATION.md` | Align migration runbook with Neon serverless connection and pooling | Migration runbook verification |
+
 ---
 
 ## Ledger Summary
 
-- **Total Atomic Commits Recorded:** 27
+- **Total Atomic Commits Recorded:** 35
 - **One-File Atomicity Compliance:** 100% (each commit modifies exactly 1 tracked file)
 - **Author Identity:** Verified as `Anant Kumar <anant9934@users.noreply.github.com>` on every commit
 - **Verification Guarantee:** 100% of commits accompanied by green targeted automated unit/integration tests
