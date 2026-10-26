@@ -54,7 +54,7 @@ export class LocalCandidateRepository implements CandidateRepository {
 }
 
 export class LocalJobRepository implements JobRepository {
-  async list(filter?: JobFilterOptions): Promise<{ jobs: Job[]; total: number }> {
+  async list(filter?: JobFilterOptions): Promise<{ jobs: Job[]; total: number; nextCursor?: string }> {
     let jobs = db.getJobs();
 
     if (filter?.q) {
@@ -89,10 +89,17 @@ export class LocalJobRepository implements JobRepository {
     }
 
     const total = jobs.length;
+    let nextCursor: string | undefined;
+
     if (filter?.limit && filter.limit > 0) {
       const page = filter.page && filter.page > 0 ? filter.page : 1;
       const offset = (page - 1) * filter.limit;
-      jobs = jobs.slice(offset, offset + filter.limit);
+      const pagedJobs = jobs.slice(offset, offset + filter.limit);
+      if (pagedJobs.length === filter.limit && offset + filter.limit < total) {
+        const last = pagedJobs[pagedJobs.length - 1];
+        nextCursor = Buffer.from(`${last.postedAt || "recently"}::${last.id}`).toString("base64");
+      }
+      return { jobs: pagedJobs, total, nextCursor };
     }
 
     return { jobs, total };
@@ -142,6 +149,12 @@ export class LocalApplicationRepository implements ApplicationRepository {
     const apps = db.getApplications(candidateId);
     return apps.find((a) => a.jobId === jobId) || null;
   }
+
+  async hasAppliedBatch(candidateId: string, jobIds: string[]): Promise<Set<string>> {
+    const apps = db.getApplications(candidateId);
+    const appliedJobIds = new Set(apps.map((a) => a.jobId));
+    return new Set(jobIds.filter((id) => appliedJobIds.has(id)));
+  }
 }
 
 export class LocalSavedJobRepository implements SavedJobRepository {
@@ -155,6 +168,11 @@ export class LocalSavedJobRepository implements SavedJobRepository {
 
   async isSaved(candidateId: string, jobId: string): Promise<boolean> {
     return db.isJobSaved(jobId, candidateId);
+  }
+
+  async isSavedBatch(candidateId: string, jobIds: string[]): Promise<Set<string>> {
+    const saved = new Set(db.getSavedJobIds(candidateId));
+    return new Set(jobIds.filter((id) => saved.has(id)));
   }
 }
 
