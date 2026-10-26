@@ -65,7 +65,7 @@ export function getWritePool(): Pool {
  * Executes a read query against the read replica pool with circuit breaker protection.
  * If read replica fails, automatically falls back to primary write pool.
  */
-export async function queryRead<R extends QueryResultRow = any>(
+export async function queryRead<R extends QueryResultRow = QueryResultRow>(
   text: string,
   params?: unknown[]
 ): Promise<QueryResult<R>> {
@@ -93,7 +93,7 @@ export async function queryRead<R extends QueryResultRow = any>(
 /**
  * Executes a write query against the primary database pool.
  */
-export async function queryWrite<R extends QueryResultRow = any>(
+export async function queryWrite<R extends QueryResultRow = QueryResultRow>(
   text: string,
   params?: unknown[]
 ): Promise<QueryResult<R>> {
