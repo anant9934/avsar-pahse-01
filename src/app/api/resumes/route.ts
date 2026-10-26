@@ -33,9 +33,6 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const rateLimitResponse = await enforceRateLimit(request);
-    if (rateLimitResponse) return rateLimitResponse as NextResponse;
-
     const auth = getAuthenticatedCandidate(request);
     if (!auth) {
       return NextResponse.json(
@@ -43,6 +40,9 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    const rateLimitResponse = await enforceRateLimit(request, undefined, auth.candidateId);
+    if (rateLimitResponse) return rateLimitResponse as NextResponse;
 
     const resumeRepo = getResumeRepository();
     const contentType = request.headers.get("content-type") || "";
