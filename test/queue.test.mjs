@@ -98,6 +98,31 @@ test("MemoryQueue: sends permanently failing job to Dead Letter Queue (DLQ)", as
   assert.equal(dlq[0].failedReason, "Permanent database failure");
 });
 
+test("MemoryQueue: executes high priority jobs ahead of lower priority jobs", async () => {
+  const queue = new MemoryQueue({ concurrency: 1 });
+  const executionOrder = [];
+
+  queue.registerHandler("order_test", async (job) => {
+    executionOrder.push(job.payload.name);
+    // slight delay to ensure concurrency constraint holds
+    await new Promise((r) => setTimeout(r, 20));
+  });
+
+  // Enqueue starter and let the single worker pick it up
+  queue.enqueue("order_test", { name: "starter" }, { priority: "normal" });
+  await new Promise((r) => setTimeout(r, 5));
+
+  // Now enqueue low, normal, and high jobs while worker is occupied
+  queue.enqueue("order_test", { name: "low_1" }, { priority: "low" });
+  queue.enqueue("order_test", { name: "normal_1" }, { priority: "normal" });
+  queue.enqueue("order_test", { name: "high_1" }, { priority: "high" });
+
+  await queue.drain(3000);
+
+  // High priority should execute before normal, and normal before low
+  assert.deepEqual(executionOrder, ["starter", "high_1", "normal_1", "low_1"]);
+});
+
 test("Unified Queue Facade: routes standard events via singleton", async () => {
   resetQueueForTesting();
   let received = false;
