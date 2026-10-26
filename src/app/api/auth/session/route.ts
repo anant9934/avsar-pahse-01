@@ -1,34 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AUTH_CONFIG } from "@/lib/auth/aitathastu";
-import { db } from "@/lib/db";
+import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth/session";
+import { getCandidateRepository } from "@/lib/repository";
+import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
 
 export async function GET(request: NextRequest) {
-  const sessionCookie = request.cookies.get(AUTH_CONFIG.cookieName)?.value;
-  const candidate = db.getCandidate();
+  try {
+    const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
 
-  if (sessionCookie) {
-    try {
-      const session = JSON.parse(sessionCookie);
-      return NextResponse.json({
-        authenticated: true,
-        user: session,
-        candidate,
-      });
-    } catch {
-      // Fall through to unauthenticated
+    if (sessionCookie) {
+      const session = verifySessionToken(sessionCookie);
+      if (session && session.userId) {
+        const candRepo = getCandidateRepository();
+        const candidate = await candRepo.getById(session.userId);
+        return NextResponse.json({
+          authenticated: true,
+          user: session,
+          candidate,
+        });
+      }
     }
-  }
 
-  // If no cookie is present, default to candidate (Rohan) in dev or unauthenticated
-  return NextResponse.json({
-    authenticated: true,
-    user: {
-      userId: candidate.id,
-      name: candidate.name,
-      email: candidate.email,
-      avatar: candidate.avatar,
-      provider: "demo_rohan",
-    },
-    candidate,
-  });
+    // If no valid session cookie is present, return safe unauthenticated status
+    return NextResponse.json({
+      authenticated: false,
+      user: null,
+      candidate: null,
+    });
+  } catch (err: unknown) {
+    if (err instanceof DatabaseUnavailableError || err instanceof DatabaseConfigurationError) {
+      return NextResponse.json(
+        { error: "Database service temporarily unavailable. Please try again shortly." },
+        { status: 503 }
+      );
+    }
+    const msg = err instanceof Error ? err.message : "Internal server error";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
