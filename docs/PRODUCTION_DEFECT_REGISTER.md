@@ -16,12 +16,12 @@
 
 | ID | Severity | Category | Affected File(s) | Summary | Status | Commit SHA |
 |---|---|---|---|---|---|---|
-| `DEFECT-AUTH-01` | **P1** | Authorization | `src/app/api/jobs/[id]/route.ts` | Single job API hardcodes Rohan Sharma for match score and bookmark resolution | OPEN | Pending |
-| `DEFECT-AUTH-02` | **P1** | Authorization | `src/app/jobs/[id]/page.tsx` | SSR job detail page pre-renders match and bookmark state using hardcoded candidate | OPEN | Pending |
-| `DEFECT-AUTH-03` | **P1** | Authorization | `src/app/jobs/[id]/match/page.tsx` | SSR match breakdown pre-renders analysis against hardcoded candidate | OPEN | Pending |
-| `DEFECT-SEC-01` | **P1** | Security / XSS | `src/lib/auth/url-sanitizer.ts`, `src/lib/jobs/normalization.ts` | External application links accept dangerous schemes (`javascript:`, `data:`) | OPEN | Pending |
-| `DEFECT-APP-01` | **P2** | Data Integrity | `src/app/api/applications/route.ts` | Non-existent resume ID is accepted when submitting an application | OPEN | Pending |
-| `DEFECT-UI-01` | **P2** | User Experience | `src/app/jobs/[id]/apply/page.tsx` | Application form pre-fills Rohan Sharma's portfolio URL and pitch | OPEN | Pending |
+| `DEFECT-AUTH-01` | **P1** | Authorization | `src/app/api/jobs/[id]/route.ts` | Single job API hardcodes Rohan Sharma for match score and bookmark resolution | **RESOLVED** | `1c7ce40`, `5353b9d` |
+| `DEFECT-AUTH-02` | **P1** | Authorization | `src/app/jobs/[id]/page.tsx` | SSR job detail page pre-renders match and bookmark state using hardcoded candidate | **RESOLVED** | `627ddfd` |
+| `DEFECT-AUTH-03` | **P1** | Authorization | `src/app/jobs/[id]/match/page.tsx` | SSR match breakdown pre-renders analysis against hardcoded candidate | **RESOLVED** | `faaca5c` |
+| `DEFECT-SEC-01` | **P1** | Security / XSS | `src/lib/auth/url-sanitizer.ts`, `src/lib/jobs/normalization.ts` | External application links accept dangerous schemes (`javascript:`, `data:`) | **RESOLVED** | `2077c4a`, `00fcf5c`, `e8652af`, `349ff0e` |
+| `DEFECT-APP-01` | **P2** | Data Integrity | `src/app/api/applications/route.ts` | Non-existent resume ID is accepted when submitting an application | **RESOLVED** | `559939d`, `19477c9` |
+| `DEFECT-UI-01` | **P2** | User Experience | `src/app/jobs/[id]/apply/page.tsx` | Application form pre-fills Rohan Sharma's portfolio URL and pitch | **RESOLVED** | `19574f0` |
 
 ---
 
