@@ -32,9 +32,9 @@ export function getBackgroundQueue(): MemoryQueue {
 export async function enqueueJob<T>(
   type: string,
   payload: T,
-  maxRetries?: number
+  optionsOrRetries?: number | { maxRetries?: number; priority?: import("./types.ts").JobPriority }
 ): Promise<QueueJob<T>> {
-  return getBackgroundQueue().enqueue<T>(type, payload, maxRetries);
+  return getBackgroundQueue().enqueue<T>(type, payload, optionsOrRetries);
 }
 
 export function getQueueStats(): QueueStats {
