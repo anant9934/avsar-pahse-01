@@ -30,6 +30,9 @@ export function getAdminSecret(): string | null {
   if (process.env.AVSAR_ADMIN_SECRET) {
     return process.env.AVSAR_ADMIN_SECRET;
   }
+  if (process.env.ADMIN_SECRET) {
+    return process.env.ADMIN_SECRET;
+  }
   if (process.env.NODE_ENV === "production") {
     // In production, no static fallback is permitted
     return null;
