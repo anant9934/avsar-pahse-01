@@ -14,6 +14,7 @@ import {
   LogOut,
   Edit2,
   X,
+  Check,
 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { MobileHeader } from "@/components/navigation/MobileHeader";
@@ -24,6 +25,7 @@ export default function CandidateProfilePage() {
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [isEditingBasic, setIsEditingBasic] = useState(false);
+  const [showToast, setShowToast] = useState(false);
   const [editForm, setEditForm] = useState({
     name: "",
     headline: "",
@@ -32,6 +34,16 @@ export default function CandidateProfilePage() {
     phone: "",
     skillsStr: "",
   });
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && isEditingBasic) {
+        setIsEditingBasic(false);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isEditingBasic]);
 
   useEffect(() => {
     async function loadProfile() {
@@ -79,6 +91,8 @@ export default function CandidateProfilePage() {
         const data = await res.json();
         setCandidate(data.candidate);
         setIsEditingBasic(false);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 2500);
       }
     } catch (err) {
       console.error(err);
@@ -128,7 +142,19 @@ export default function CandidateProfilePage() {
 
   return (
     <MobileShell activeScreenNumber={12}>
-      <div className="flex-1 flex flex-col pb-8 bg-[#F8F6F1]">
+      <div className="flex-1 flex flex-col pb-8 bg-[#F8F6F1] relative">
+        {/* Toast confirmation */}
+        {showToast && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-[#242720] text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-2"
+          >
+            <Check className="w-4 h-4 text-[#48B37C]" aria-hidden="true" />
+            <span>Profile updated successfully!</span>
+          </div>
+        )}
+
         {/* Mobile Header */}
         <MobileHeader
           title="My Profile"
@@ -136,10 +162,11 @@ export default function CandidateProfilePage() {
           rightAction={
             <Link
               href="/api/auth/logout"
-              className="p-1.5 text-[#77786F] hover:text-[#D13636] transition-colors"
+              className="w-11 h-11 rounded-full flex items-center justify-center text-[#77786F] hover:text-[#D13636] hover:bg-[#F2EFE9] transition-colors"
               title="Sign Out"
+              aria-label="Sign Out of Avsar"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-4 h-4" aria-hidden="true" />
             </Link>
           }
         />
@@ -152,6 +179,7 @@ export default function CandidateProfilePage() {
                 src={candidate?.avatar || "/images/avatar-rohan.jpg"}
                 alt={candidate?.name || "Rohan Sharma"}
                 fill
+                sizes="80px"
                 className="object-cover"
                 priority
               />
@@ -164,10 +192,10 @@ export default function CandidateProfilePage() {
               <button
                 type="button"
                 onClick={() => setIsEditingBasic(!isEditingBasic)}
-                className="p-1 rounded-full hover:bg-[#EAE7DF] text-[#77786F]"
+                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#EAE7DF] text-[#77786F] transition-colors"
                 aria-label="Edit Profile Details"
               >
-                <Edit2 className="w-3.5 h-3.5" />
+                <Edit2 className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
             </div>
 
@@ -178,45 +206,62 @@ export default function CandidateProfilePage() {
 
           {/* Inline Edit Form Modal / Panel */}
           {isEditingBasic && (
-            <div className="card-surface p-4 bg-white border-[#285C45]/30 shadow-sm space-y-3">
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="edit-details-title"
+              className="card-surface p-4 bg-white border-[#285C45]/30 shadow-sm space-y-3"
+            >
               <div className="flex items-center justify-between pb-1 border-b border-[#ECEAE3]">
-                <span className="text-xs font-bold text-[#242720]">Edit Candidate Details</span>
+                <span id="edit-details-title" className="text-xs font-bold text-[#242720]">
+                  Edit Candidate Details
+                </span>
                 <button
                   type="button"
                   onClick={() => setIsEditingBasic(false)}
-                  className="text-[#77786F] hover:text-black"
+                  aria-label="Close edit form"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-[#77786F] hover:text-black hover:bg-[#F2EFE9]"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4" aria-hidden="true" />
                 </button>
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-[#77786F] block mb-1">Full Name</label>
+                <label htmlFor="edit-name" className="text-[11px] font-bold text-[#77786F] block mb-1">
+                  Full Name
+                </label>
                 <input
+                  id="edit-name"
                   type="text"
                   value={editForm.name}
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  className="w-full h-9 px-3 bg-[#FAF9F5] border border-[#EAE7DF] rounded-lg text-xs"
+                  className="w-full h-10 px-3 bg-[#FAF9F5] border border-[#EAE7DF] rounded-lg text-xs"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-[#77786F] block mb-1">Headline</label>
+                <label htmlFor="edit-headline" className="text-[11px] font-bold text-[#77786F] block mb-1">
+                  Headline
+                </label>
                 <input
+                  id="edit-headline"
                   type="text"
                   value={editForm.headline}
                   onChange={(e) => setEditForm({ ...editForm, headline: e.target.value })}
-                  className="w-full h-9 px-3 bg-[#FAF9F5] border border-[#EAE7DF] rounded-lg text-xs"
+                  className="w-full h-10 px-3 bg-[#FAF9F5] border border-[#EAE7DF] rounded-lg text-xs"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-[#77786F] block mb-1">Skills (comma separated)</label>
+                <label htmlFor="edit-skills" className="text-[11px] font-bold text-[#77786F] block mb-1">
+                  Skills (comma separated)
+                </label>
                 <input
+                  id="edit-skills"
                   type="text"
                   value={editForm.skillsStr}
                   onChange={(e) => setEditForm({ ...editForm, skillsStr: e.target.value })}
-                  className="w-full h-9 px-3 bg-[#FAF9F5] border border-[#EAE7DF] rounded-lg text-xs"
+                  className="w-full h-10 px-3 bg-[#FAF9F5] border border-[#EAE7DF] rounded-lg text-xs"
                 />
               </div>
 
@@ -224,14 +269,14 @@ export default function CandidateProfilePage() {
                 <button
                   type="button"
                   onClick={() => setIsEditingBasic(false)}
-                  className="px-3 py-1.5 rounded-lg border border-[#EAE7DF] text-xs font-semibold"
+                  className="px-4 py-2 rounded-lg border border-[#EAE7DF] text-xs font-semibold min-h-[44px] hover:bg-[#F2EFE9] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveBasic}
-                  className="px-4 py-1.5 rounded-lg bg-[#285C45] text-white text-xs font-bold hover:bg-[#1E4735]"
+                  className="px-5 py-2 rounded-lg bg-[#285C45] text-white text-xs font-bold hover:bg-[#1E4735] min-h-[44px] transition-colors shadow-xs"
                 >
                   Save Changes
                 </button>
