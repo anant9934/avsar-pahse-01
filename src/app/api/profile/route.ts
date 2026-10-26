@@ -3,6 +3,7 @@ import { getCandidateRepository } from "@/lib/repository";
 import { getAuthenticatedCandidate } from "@/lib/auth/session";
 import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
 import { enqueueJob } from "@/lib/queue";
+import { pinCandidateToPrimary } from "@/lib/db/replica-lag";
 
 export async function GET(request: NextRequest) {
   try {
@@ -52,6 +53,9 @@ export async function PATCH(request: NextRequest) {
 
     const candRepo = getCandidateRepository();
     const updated = await candRepo.update(auth.candidateId, updates);
+
+    // Enforce Read-After-Write consistency for subsequent queries from this candidate
+    pinCandidateToPrimary(auth.candidateId);
 
     // Asynchronously dispatch background match score recalculation (low priority) and audit event (high priority)
     await enqueueJob(
