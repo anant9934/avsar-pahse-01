@@ -12,12 +12,43 @@ export interface AIUserProfile {
   education?: Array<{ institution: string; degree: string }>;
 }
 
+/**
+ * Resolve the canonical deployment base URL based on environment configuration
+ */
+export function resolveDeploymentBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "");
+  }
+  if (process.env.AVSAR_APP_URL) {
+    return process.env.AVSAR_APP_URL.replace(/\/+$/, "");
+  }
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return "http://localhost:3000";
+}
+
+/**
+ * Resolve the OAuth callback redirect URI
+ */
+export function resolveRedirectUri(): string {
+  if (process.env.AVSAR_AUTH_REDIRECT_URI) {
+    return process.env.AVSAR_AUTH_REDIRECT_URI;
+  }
+  const baseUrl = resolveDeploymentBaseUrl();
+  return `${baseUrl}/api/auth/aitathastu/callback`;
+}
+
 export const AUTH_CONFIG = {
   clientId: process.env.AI_TATHASTU_CLIENT_ID || "avsar",
   clientSecret: process.env.AI_TATHASTU_CLIENT_SECRET || "",
   issuer: (process.env.AI_TATHASTU_ISSUER_URL || "https://www.aitathastu.com").replace(/\/+$/, ""),
-  redirectUri:
-    process.env.AVSAR_AUTH_REDIRECT_URI || "http://localhost:3000/api/auth/aitathastu/callback",
+  get redirectUri(): string {
+    return resolveRedirectUri();
+  },
   cookieName: "avsar_session",
   stateCookieName: "avsar_oauth_state",
   verifierCookieName: "avsar_oauth_verifier",
@@ -54,6 +85,9 @@ export function validateAuthConfig(): {
   }
   if (!process.env.AVSAR_ADMIN_SECRET && isProd) {
     warnings.push("AVSAR_ADMIN_SECRET is not set in production. Administrative operations will be disabled.");
+  }
+  if (isProd && AUTH_CONFIG.redirectUri.includes("localhost")) {
+    warnings.push("AVSAR_AUTH_REDIRECT_URI or NEXT_PUBLIC_APP_URL points to localhost in production.");
   }
 
   const isProductionReady =
