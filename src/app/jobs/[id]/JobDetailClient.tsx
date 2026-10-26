@@ -24,6 +24,7 @@ import {
   Check,
 } from "lucide-react";
 import { CompanyLogo } from "@/components/brand/CompanyLogo";
+import { sanitizeExternalUrl } from "@/lib/auth/url-sanitizer";
 import type { Job, MatchAnalysis } from "@/types";
 
 export interface JobDetailClientProps {
@@ -589,16 +590,30 @@ export function JobDetailClient({
               >
                 Cancel
               </button>
-              <a
-                href={job.applyUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setShowExternalModal(false)}
-                className="flex-1 py-3 bg-[#285C45] text-white font-bold rounded-full text-xs text-center hover:bg-[#1E4735] flex items-center justify-center gap-1.5 min-h-[44px] transition-colors"
-              >
-                <span>Continue</span>
-                <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
-              </a>
+              {(() => {
+                const safeUrl = sanitizeExternalUrl(job.applyUrl);
+                return (
+                  <a
+                    href={safeUrl || "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => {
+                      if (!safeUrl) {
+                        e.preventDefault();
+                      }
+                      setShowExternalModal(false);
+                    }}
+                    className={`flex-1 py-3 text-white font-bold rounded-full text-xs text-center flex items-center justify-center gap-1.5 min-h-[44px] transition-colors ${
+                      safeUrl
+                        ? "bg-[#285C45] hover:bg-[#1E4735]"
+                        : "bg-gray-400 cursor-not-allowed opacity-60"
+                    }`}
+                  >
+                    <span>{safeUrl ? "Continue" : "Invalid Link"}</span>
+                    <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+                  </a>
+                );
+              })()}
             </div>
           </div>
         </div>
