@@ -17,7 +17,24 @@ import { MobileShell } from "@/components/layout/MobileShell";
 export default function AuthPage() {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const urlError = params.get("error");
+      const urlMsg = params.get("message");
+      if (urlMsg) return urlMsg;
+      if (urlError === "consent_denied") {
+        return "AI Tathastu authorization was denied or cancelled. Please allow access to proceed.";
+      }
+      if (urlError === "invalid_state") {
+        return "Authentication session expired or state mismatch. Please try signing in again.";
+      }
+      if (urlError === "account_disabled") {
+        return "This AI Tathastu account is disabled or inactive. Please contact support.";
+      }
+    }
+    return null;
+  });
 
   const handleDemoSignIn = async () => {
     setLoading("demo");
@@ -42,18 +59,18 @@ export default function AuthPage() {
           <button
             type="button"
             onClick={() => router.back()}
-            className="w-9 h-9 -ml-1 rounded-full flex items-center justify-center text-[#242720] hover:bg-[#EFECE5] transition-colors"
-            aria-label="Back"
+            className="w-11 h-11 -ml-2 rounded-full flex items-center justify-center text-[#242720] hover:bg-[#EFECE5] transition-colors"
+            aria-label="Go back"
           >
-            <ChevronLeft className="w-5 h-5 stroke-[2.2px]" />
+            <ChevronLeft className="w-5 h-5 stroke-[2.2px]" aria-hidden="true" />
           </button>
           <button
             type="button"
             onClick={() => setMessage("AI Tathastu is the unified single-sign-on (SSO) identity provider for Avsar.")}
-            className="w-9 h-9 rounded-full flex items-center justify-center text-[#77786F] hover:bg-[#EFECE5] transition-colors"
-            aria-label="Information"
+            className="w-11 h-11 -mr-2 rounded-full flex items-center justify-center text-[#77786F] hover:bg-[#EFECE5] transition-colors"
+            aria-label="Information about AI Tathastu authentication"
           >
-            <HelpCircle className="w-5 h-5 stroke-[1.8px]" />
+            <HelpCircle className="w-5 h-5 stroke-[1.8px]" aria-hidden="true" />
           </button>
         </div>
 
