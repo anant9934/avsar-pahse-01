@@ -69,10 +69,22 @@ export default function MyApplicationsPage() {
   return (
     <MobileShell activeScreenNumber={11} appliedCount={applications.length}>
       <div className="flex-1 flex flex-col pb-6 bg-[#F8F6F1]">
-        {/* Header */}
-        <MobileHeader title="My Applications" showBack={true} />
+        {/* Mobile Header (Hidden on desktop) */}
+        <div className="md:hidden">
+          <MobileHeader title="My Applications" showBack={true} />
+        </div>
 
-        <div className="px-4 pt-3 flex flex-col gap-3.5">
+        <div className="px-4 pt-2 sm:pt-4 flex flex-col gap-4">
+          {/* Desktop Title Banner */}
+          <div className="hidden md:flex flex-col gap-1">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#242720] tracking-tight">
+              Application Tracker
+            </h1>
+            <p className="text-xs sm:text-sm text-[#77786F]">
+              Track the real-time review status, reference IDs, and responses for your submitted applications.
+            </p>
+          </div>
+
           {/* Status Filter Tabs (Horizontal Scroll) */}
           <div
             className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4 select-none"
@@ -101,8 +113,8 @@ export default function MyApplicationsPage() {
 
           {/* Applications List or Skeletons */}
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1" aria-busy="true">
-              {[1, 2, 3].map((i) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1" aria-busy="true">
+              {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
                   className="card-surface p-4 bg-white flex items-center justify-between gap-3 min-h-[92px]"
@@ -119,7 +131,7 @@ export default function MyApplicationsPage() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
               {filteredApps.map((app) => (
                 <div
                   key={app.id}
@@ -133,15 +145,22 @@ export default function MyApplicationsPage() {
                       className="shrink-0"
                     />
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-sm font-bold text-[#242720] leading-snug truncate">
-                        {app.job?.title || "Role"}
-                      </h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-[#242720] leading-snug truncate">
+                          {app.job?.title || "Role"}
+                        </h3>
+                        {app.referenceNumber && (
+                          <span className="text-[10px] text-[#77786F] font-mono bg-[#F2EFE9] px-1.5 py-0.5 rounded shrink-0">
+                            {app.referenceNumber}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-[#77786F] mt-0.5 truncate">
                         {app.job?.company} · {app.appliedDateFormatted}
                       </p>
 
                       {/* Status Badge */}
-                      <div className="mt-2">
+                      <div className="mt-2 flex items-center gap-2">
                         <span
                           className={`text-[11px] font-bold px-2.5 py-0.5 rounded-md inline-block ${getStatusBadgeClass(
                             app.status
@@ -149,13 +168,18 @@ export default function MyApplicationsPage() {
                         >
                           {app.status}
                         </span>
+                        {app.resumeName && (
+                          <span className="text-[10px] text-[#77786F] truncate max-w-[140px]">
+                            📄 {app.resumeName}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
 
                   <Link
                     href={`/jobs/${app.jobId}`}
-                    className="w-11 h-11 rounded-full flex items-center justify-center text-[#9E9F96] hover:text-[#242720] hover:bg-[#F4F1EA] transition-colors shrink-0"
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-[#9E9F96] hover:text-[#242720] hover:bg-[#F4F1EA] transition-colors shrink-0"
                     aria-label={`View details for ${app.job?.title || "application"}`}
                   >
                     <ChevronRight className="w-5 h-5" aria-hidden="true" />
