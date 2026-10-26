@@ -174,3 +174,46 @@ CREATE TABLE IF NOT EXISTS import_history (
 );
 
 CREATE INDEX IF NOT EXISTS idx_import_history_created ON import_history(created_at);
+
+-- 9. Schema migrations table (Version tracking and release integrity)
+CREATE TABLE IF NOT EXISTS schema_migrations (
+    version VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 10. Idempotency keys table (Network retry deduplication and response caching)
+CREATE TABLE IF NOT EXISTS idempotency_keys (
+    key VARCHAR(255) PRIMARY KEY,
+    scope VARCHAR(100) NOT NULL,
+    candidate_id VARCHAR(255),
+    payload_hash VARCHAR(64) NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'IN_PROGRESS',
+    response_code INTEGER,
+    response_body JSONB,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expires_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_idempotency_expires ON idempotency_keys (expires_at);
+CREATE INDEX IF NOT EXISTS idx_idempotency_candidate_scope ON idempotency_keys (candidate_id, scope);
+
+-- 11. Durable jobs table (ACID queue for background processing with SKIP LOCKED)
+CREATE TABLE IF NOT EXISTS durable_jobs (
+    id VARCHAR(255) PRIMARY KEY,
+    type VARCHAR(100) NOT NULL,
+    payload JSONB NOT NULL,
+    priority VARCHAR(20) NOT NULL DEFAULT 'normal',
+    status VARCHAR(50) NOT NULL DEFAULT 'pending',
+    attempts INTEGER NOT NULL DEFAULT 0,
+    max_attempts INTEGER NOT NULL DEFAULT 3,
+    lease_id VARCHAR(255),
+    leased_until TIMESTAMPTZ,
+    failed_reason TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_durable_jobs_polling ON durable_jobs (status, priority, created_at)
+WHERE status IN ('pending', 'leased');
+CREATE INDEX IF NOT EXISTS idx_durable_jobs_type ON durable_jobs (type, status);
