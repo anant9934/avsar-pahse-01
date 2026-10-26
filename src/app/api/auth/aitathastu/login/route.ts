@@ -1,29 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AUTH_CONFIG, buildAuthorizeUrl, generatePKCE } from "@/lib/auth/aitathastu";
+import {
+  SESSION_COOKIE_NAME,
+  SESSION_MAX_AGE_SECONDS,
+  sanitizeReturnTo,
+  signSessionPayload,
+} from "@/lib/auth/session";
+import { db } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const demo = searchParams.get("demo");
   const provider = searchParams.get("provider") as "google" | "email" | null;
-  const returnTo = searchParams.get("return_to") || "/home";
+  const rawReturnTo = searchParams.get("return_to");
 
-  // Fast demo sign-in for seamless verification without external IdP deployment
+  // Strict same-origin relative path validation
+  const returnTo = sanitizeReturnTo(rawReturnTo, "/home");
+
+  // Fast demo sign-in: strictly restricted to development or when ALLOW_DEMO_AUTH is true
   if (demo === "rohan" || demo === "true") {
+    const isDemoAllowed =
+      process.env.NODE_ENV !== "production" || process.env.ALLOW_DEMO_AUTH === "true";
+
+    if (!isDemoAllowed) {
+      return NextResponse.json(
+        { error: "Demo authentication is disabled in production environments." },
+        { status: 403 }
+      );
+    }
+
+    const defaultCandidate = db.getCandidate();
+    const sessionToken = signSessionPayload({
+      userId: defaultCandidate.id,
+      aiTathastuId: defaultCandidate.aiTathastuId,
+      name: defaultCandidate.name,
+      email: defaultCandidate.email,
+      avatar: defaultCandidate.avatar,
+      role: "candidate",
+      provider: "demo_rohan",
+      createdAt: Date.now(),
+    });
+
     const response = NextResponse.redirect(new URL(returnTo, request.url));
     response.cookies.set({
-      name: AUTH_CONFIG.cookieName,
-      value: JSON.stringify({
-        userId: "cand_rohan_sharma_001",
-        name: "Rohan Sharma",
-        email: "rohan@example.com",
-        avatar: "/images/avatar-rohan.jpg",
-        provider: "demo_rohan",
-        createdAt: Date.now(),
-      }),
+      name: SESSION_COOKIE_NAME,
+      value: sessionToken,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: SESSION_MAX_AGE_SECONDS,
       sameSite: "lax",
     });
     return response;
@@ -41,20 +66,30 @@ export async function GET(request: NextRequest) {
 
   const response = NextResponse.redirect(authUrl);
 
-  // Store verifier and state in temporary secure HTTP-only cookies
+  // Store verifier, state, and verified return_to in temporary secure HTTP-only cookies
   response.cookies.set({
     name: AUTH_CONFIG.stateCookieName,
     value: state,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: 600, // 10 minutes
+    maxAge: 600, // 10 minutes single-use
     sameSite: "lax",
   });
 
   response.cookies.set({
     name: AUTH_CONFIG.verifierCookieName,
     value: verifier,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 600,
+    sameSite: "lax",
+  });
+
+  response.cookies.set({
+    name: AUTH_CONFIG.returnToCookieName,
+    value: returnTo,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     path: "/",
