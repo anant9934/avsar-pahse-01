@@ -4,6 +4,7 @@ import {
   generateETag,
   isNotModified,
   buildCacheControlHeader,
+  evaluateConditionalRequest,
 } from "../src/lib/cache/http-cache.ts";
 
 test("HTTP Cache: generateETag produces valid RFC weak ETags", () => {
@@ -61,7 +62,33 @@ test("HTTP Cache: buildCacheControlHeader formats CDN & Edge caching directives"
   const privateHeader = buildCacheControlHeader({ isPrivate: true });
   assert.equal(privateHeader, "private, no-cache, no-store, must-revalidate");
 
-  // Must-revalidate option
+// Must-revalidate option
   const revalidateHeader = buildCacheControlHeader({ maxAge: 300, mustRevalidate: true });
   assert.equal(revalidateHeader, "public, max-age=300, must-revalidate");
+});
+
+test("HTTP Cache: evaluateConditionalRequest generates 304 Not Modified on ETag match", () => {
+  const payload = { id: "job_99", title: "Site Reliability Engineer" };
+  const etag = generateETag(payload);
+
+  // When If-None-Match matches, returns 304 with correct headers
+  const reqHeadersMatch = new Headers({ "if-none-match": etag });
+  const evalMatch = evaluateConditionalRequest(reqHeadersMatch, payload, { sMaxAge: 120 });
+
+  assert.equal(evalMatch.isNotModified, true);
+  assert.equal(evalMatch.status, 304);
+  assert.equal(evalMatch.etag, etag);
+  assert.ok(evalMatch.headers["Cache-Control"].includes("s-maxage=120"));
+
+  // When If-None-Match differs or missing, returns 200
+  const reqHeadersMiss = new Headers({ "if-none-match": '"outdated-etag"' });
+  const evalMiss = evaluateConditionalRequest(reqHeadersMiss, payload, { sMaxAge: 120 });
+
+  assert.equal(evalMiss.isNotModified, false);
+  assert.equal(evalMiss.status, 200);
+
+  // Private routes must receive strict no-store
+  const evalPrivate = evaluateConditionalRequest(new Headers(), payload, { isPrivate: true });
+  assert.ok(evalPrivate.headers["Cache-Control"].includes("no-store"));
+  assert.ok(evalPrivate.headers["Cache-Control"].includes("private"));
 });
