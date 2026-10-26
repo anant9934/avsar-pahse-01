@@ -38,9 +38,12 @@ function getSessionSecret(): string {
   if (process.env.AVSAR_SESSION_SECRET) {
     return process.env.AVSAR_SESSION_SECRET;
   }
+  if (process.env.SESSION_SECRET) {
+    return process.env.SESSION_SECRET;
+  }
   if (process.env.NODE_ENV === "production") {
     throw new Error(
-      "CRITICAL: AVSAR_SESSION_SECRET environment variable must be set in production environments."
+      "CRITICAL: AVSAR_SESSION_SECRET or SESSION_SECRET environment variable must be set in production environments."
     );
   }
   return "avsar_dev_session_signing_secret_do_not_use_in_prod_32bytes";
