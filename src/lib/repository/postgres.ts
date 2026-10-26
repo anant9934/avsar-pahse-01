@@ -764,103 +764,122 @@ export class PostgresApplicationRepository implements ApplicationRepository {
     resumeId: string;
     answers: Record<string, string>;
   }): Promise<{ success: boolean; application?: Application; error?: string }> {
-    return await withTransaction(async (client) => {
-      // 1. Verify Job existence and status
-      const jobRes = await client.query(`SELECT * FROM jobs WHERE id = $1 FOR SHARE`, [
-        submission.jobId,
-      ]);
-      if (jobRes.rows.length === 0) {
-        return { success: false, error: "Job listing not found." };
-      }
-      const job = mapJobRow(jobRes.rows[0]);
-      if (job.isPossiblyClosed) {
-        return {
-          success: false,
-          error:
-            "This job listing is marked as closed or expired on the source platform and is no longer accepting new applications.",
-        };
-      }
-
-      // 2. Verify Candidate existence
-      const candRes = await client.query(`SELECT * FROM candidates WHERE id = $1`, [
-        submission.candidateId,
-      ]);
-      if (candRes.rows.length === 0) {
-        return { success: false, error: "Candidate not found." };
-      }
-      const candidate = mapCandidateRow(candRes.rows[0]);
-
-      // 3. Atomically check for duplicate application
-      const dupRes = await client.query(
-        `SELECT * FROM applications WHERE candidate_id = $1 AND job_id = $2`,
-        [submission.candidateId, submission.jobId]
-      );
-      if (dupRes.rows.length > 0) {
-        const existing = mapApplicationRow(dupRes.rows[0], job, candidate);
-        return {
-          success: false,
-          error: `You have already submitted an application for this role (${existing.referenceNumber}).`,
-          application: existing,
-        };
-      }
-
-      // 4. Resolve Resume metadata
-      const resumeRes = await client.query(
-        `SELECT * FROM resumes WHERE id = $1 AND candidate_id = $2`,
-        [submission.resumeId, submission.candidateId]
-      );
-      const resume = resumeRes.rows.length > 0 ? mapResumeRow(resumeRes.rows[0]) : null;
-      const resumeName = resume?.fileName || "Candidate_Resume.pdf";
-
-      // 5. Generate unique reference: AVS-YYYY-MMDD-XXXX
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, "0");
-      const day = String(now.getDate()).padStart(2, "0");
-      const rand = Math.floor(1000 + Math.random() * 9000);
-      const referenceNumber = `AVS-${year}-${month}${day}-${rand}`;
-
-      const appId = `app_${randomUUID()}`;
-      const nowIso = now.toISOString();
-
-      await client.query(
-        `INSERT INTO applications (
-           id, job_id, candidate_id, status, reference_number,
-           resume_id, resume_name, answers, applied_at,
-           applied_date_formatted, updated_at
-         ) VALUES ($1, $2, $3, 'Under Review', $4, $5, $6, $7, NOW(), 'Applied today', NOW())`,
-        [
-          appId,
+    try {
+      return await withTransaction(async (client) => {
+        // 1. Verify Job existence and status
+        const jobRes = await client.query(`SELECT * FROM jobs WHERE id = $1 FOR SHARE`, [
           submission.jobId,
+        ]);
+        if (jobRes.rows.length === 0) {
+          return { success: false, error: "Job listing not found." };
+        }
+        const job = mapJobRow(jobRes.rows[0]);
+        if (job.isPossiblyClosed) {
+          return {
+            success: false,
+            error:
+              "This job listing is marked as closed or expired on the source platform and is no longer accepting new applications.",
+          };
+        }
+
+        // 2. Verify Candidate existence
+        const candRes = await client.query(`SELECT * FROM candidates WHERE id = $1`, [
           submission.candidateId,
+        ]);
+        if (candRes.rows.length === 0) {
+          return { success: false, error: "Candidate not found." };
+        }
+        const candidate = mapCandidateRow(candRes.rows[0]);
+
+        // 3. Atomically check for duplicate application
+        const dupRes = await client.query(
+          `SELECT * FROM applications WHERE candidate_id = $1 AND job_id = $2`,
+          [submission.candidateId, submission.jobId]
+        );
+        if (dupRes.rows.length > 0) {
+          const existing = mapApplicationRow(dupRes.rows[0], job, candidate);
+          return {
+            success: false,
+            error: `You have already submitted an application for this role (${existing.referenceNumber}).`,
+            application: existing,
+          };
+        }
+
+        // 4. Resolve Resume metadata
+        const resumeRes = await client.query(
+          `SELECT * FROM resumes WHERE id = $1 AND candidate_id = $2`,
+          [submission.resumeId, submission.candidateId]
+        );
+        const resume = resumeRes.rows.length > 0 ? mapResumeRow(resumeRes.rows[0]) : null;
+        const resumeName = resume?.fileName || "Candidate_Resume.pdf";
+
+        // 5. Generate unique reference: AVS-YYYY-MMDD-XXXX
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        const rand = Math.floor(1000 + Math.random() * 9000);
+        const referenceNumber = `AVS-${year}-${month}${day}-${rand}`;
+
+        const appId = `app_${randomUUID()}`;
+        const nowIso = now.toISOString();
+
+        await client.query(
+          `INSERT INTO applications (
+             id, job_id, candidate_id, status, reference_number,
+             resume_id, resume_name, answers, applied_at,
+             applied_date_formatted, updated_at
+           ) VALUES ($1, $2, $3, 'Under Review', $4, $5, $6, $7, NOW(), 'Applied today', NOW())`,
+          [
+            appId,
+            submission.jobId,
+            submission.candidateId,
+            referenceNumber,
+            submission.resumeId,
+            resumeName,
+            JSON.stringify(submission.answers || {}),
+          ]
+        );
+
+        const createdApp: Application = {
+          id: appId,
           referenceNumber,
-          submission.resumeId,
+          jobId: submission.jobId,
+          candidateId: submission.candidateId,
+          resumeId: submission.resumeId,
           resumeName,
-          JSON.stringify(submission.answers || {}),
-        ]
-      );
+          status: "Under Review",
+          answers: submission.answers || {},
+          appliedAt: nowIso,
+          appliedDateFormatted: "Applied today",
+          updatedAt: nowIso,
+          job,
+          candidate,
+        };
 
-      const createdApp: Application = {
-        id: appId,
-        referenceNumber,
-        jobId: submission.jobId,
-        candidateId: submission.candidateId,
-        resumeId: submission.resumeId,
-        resumeName,
-        status: "Under Review",
-        answers: submission.answers || {},
-        appliedAt: nowIso,
-        appliedDateFormatted: "Applied today",
-        updatedAt: nowIso,
-        job,
-        candidate,
-      };
-
-      return {
-        success: true,
-        application: createdApp,
-      };
-    });
+        return {
+          success: true,
+          application: createdApp,
+        };
+      });
+    } catch (err: unknown) {
+      if ((err as { code?: string })?.code === "23505") {
+        // Race condition: concurrent submission committed simultaneously
+        const existingRes = await query(
+          `SELECT * FROM applications WHERE candidate_id = $1 AND job_id = $2`,
+          [submission.candidateId, submission.jobId]
+        );
+        if (existingRes.rows.length > 0) {
+          const existing = mapApplicationRow(existingRes.rows[0]);
+          return {
+            success: false,
+            error: `You have already submitted an application for this role (${existing.referenceNumber}).`,
+            application: existing,
+          };
+        }
+      }
+      throw err;
+    }
   }
 
   async hasAppliedBatch(candidateId: string, jobIds: string[]): Promise<Set<string>> {
