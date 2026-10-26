@@ -1,3 +1,5 @@
+import { extractVerifiedClientIp } from "./trusted-proxies.ts";
+
 // Standard IPv4 and IPv6 validation patterns
 const IPV4_REGEX = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 const IPV6_REGEX = /^(?:[a-fA-F0-9]{1,4}:){7}[a-fA-F0-9]{1,4}$|^::1$|^::$|^(?:[a-fA-F0-9]{1,4}:)*::(?:[a-fA-F0-9]{1,4}:)*[a-fA-F0-9]{1,4}$/;
@@ -16,39 +18,44 @@ export function isValidIp(ip: string): boolean {
  * cannot be spoofed by HTTP clients, followed by defensive X-Forwarded-For parsing.
  */
 export function resolveClientIp(request: Request | { headers: Headers }): string {
-  const headers = request.headers;
+  const { clientIp } = extractVerifiedClientIp(request.headers);
+  return clientIp;
+}
 
-  // 1. Edge-authenticated platform headers (tamper-proof on Vercel & Cloudflare)
-  const xVercelForwardedFor = headers.get("x-vercel-forwarded-for");
-  if (xVercelForwardedFor) {
-    const candidate = xVercelForwardedFor.split(",")[0].trim();
-    if (isValidIp(candidate)) return candidate;
+export interface RateLimitSubject {
+  subject: string;
+  type: "candidate" | "ip";
+  clientIp: string;
+  isTrustedEdge: boolean;
+  isCampusNat: boolean;
+}
+
+/**
+ * Resolves the appropriate rate-limiting subject for an incoming request.
+ * Prioritizes authenticated candidate ID over raw client IP so students
+ * sharing university campus Wi-Fi or carrier NAT gateways are not unfairly blocked.
+ */
+export function resolveRateLimitSubject(
+  request: Request | { headers: Headers },
+  candidateId?: string | null
+): RateLimitSubject {
+  const { clientIp, isTrustedEdge, isPrivateSubnet } = extractVerifiedClientIp(request.headers);
+
+  if (candidateId && typeof candidateId === "string" && candidateId.trim() !== "") {
+    return {
+      subject: `cand:${candidateId.trim()}`,
+      type: "candidate",
+      clientIp,
+      isTrustedEdge,
+      isCampusNat: isPrivateSubnet,
+    };
   }
 
-  const xRealIp = headers.get("x-real-ip");
-  if (xRealIp) {
-    const candidate = xRealIp.trim();
-    if (isValidIp(candidate)) return candidate;
-  }
-
-  const cfConnectingIp = headers.get("cf-connecting-ip");
-  if (cfConnectingIp) {
-    const candidate = cfConnectingIp.trim();
-    if (isValidIp(candidate)) return candidate;
-  }
-
-  // 2. Standard X-Forwarded-For header
-  const xForwardedFor = headers.get("x-forwarded-for");
-  if (xForwardedFor) {
-    // If multiple IPs are chained (client, proxy1, proxy2), inspect elements
-    const ips = xForwardedFor.split(",").map((s: string) => s.trim());
-    for (const ip of ips) {
-      if (isValidIp(ip)) {
-        return ip;
-      }
-    }
-  }
-
-  // 3. Fallback for local testing or unroutable synthetic requests
-  return "127.0.0.1";
+  return {
+    subject: `ip:${clientIp}`,
+    type: "ip",
+    clientIp,
+    isTrustedEdge,
+    isCampusNat: isPrivateSubnet,
+  };
 }
