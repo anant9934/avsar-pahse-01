@@ -5,8 +5,18 @@ import { checkAdminAuth } from "@/lib/auth/admin";
 import { getAuthenticatedCandidate } from "@/lib/auth/session";
 import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
 import { cacheGetOrSet, cachePurgeTag, generateCacheKey } from "@/lib/cache";
+import {
+  extractOrCreateTraceContext,
+  createTimer,
+  recordMetric,
+  injectTraceHeaders,
+  formatServerTiming,
+} from "@/lib/telemetry";
 
 export async function GET(request: NextRequest) {
+  const traceCtx = extractOrCreateTraceContext(request);
+  const timer = createTimer(traceCtx);
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const q = searchParams.get("q")?.toLowerCase().trim();
@@ -129,14 +139,25 @@ export async function GET(request: NextRequest) {
       hasMore = page < totalPages;
     }
 
-    return NextResponse.json({
-      total,
-      page: limit > 0 ? page : 1,
-      limit: limit > 0 ? limit : total,
-      totalPages,
-      hasMore,
-      jobs: paginatedJobs,
-    });
+    const totalDuration = timer.getTotalDurationMs();
+    recordMetric("jobs_query_duration", totalDuration);
+
+    const headers = new Headers();
+    injectTraceHeaders(headers, traceCtx);
+    const serverTiming = formatServerTiming(timer.getSpans());
+    if (serverTiming) headers.set("Server-Timing", serverTiming);
+
+    return NextResponse.json(
+      {
+        total,
+        page: limit > 0 ? page : 1,
+        limit: limit > 0 ? limit : total,
+        totalPages,
+        hasMore,
+        jobs: paginatedJobs,
+      },
+      { headers }
+    );
   } catch (err: unknown) {
     if (err instanceof DatabaseUnavailableError || err instanceof DatabaseConfigurationError) {
       return NextResponse.json(
