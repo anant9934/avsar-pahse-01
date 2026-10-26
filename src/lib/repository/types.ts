@@ -10,6 +10,8 @@ export interface JobFilterOptions {
   status?: string;
   page?: number;
   limit?: number;
+  cursor?: string;
+  sortBy?: "newest" | "salary" | "deadline";
 }
 
 export interface CandidateRepository {
@@ -26,7 +28,7 @@ export interface CandidateRepository {
 }
 
 export interface JobRepository {
-  list(filter?: JobFilterOptions): Promise<{ jobs: Job[]; total: number }>;
+  list(filter?: JobFilterOptions): Promise<{ jobs: Job[]; total: number; nextCursor?: string }>;
   getById(idOrSlug: string): Promise<Job | null>;
   create(job: Omit<Job, "id" | "postedAt">): Promise<Job>;
   upsertBatch(jobs: Job[]): Promise<{ created: number; updated: number; unchanged: number }>;
@@ -44,12 +46,14 @@ export interface ApplicationRepository {
     answers: Record<string, string>;
   }): Promise<{ success: boolean; application?: Application; error?: string }>;
   checkDuplicate(candidateId: string, jobId: string): Promise<Application | null>;
+  hasAppliedBatch?(candidateId: string, jobIds: string[]): Promise<Set<string>>;
 }
 
 export interface SavedJobRepository {
   listByCandidate(candidateId: string): Promise<string[]>;
   toggle(candidateId: string, jobId: string): Promise<{ isSaved: boolean }>;
   isSaved(candidateId: string, jobId: string): Promise<boolean>;
+  isSavedBatch?(candidateId: string, jobIds: string[]): Promise<Set<string>>;
 }
 
 export interface ResumeRepository {
