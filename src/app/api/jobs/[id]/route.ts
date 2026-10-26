@@ -3,6 +3,7 @@ import { getJobRepository, getCandidateRepository, getSavedJobRepository } from 
 import { calculateJobMatch } from "@/lib/matching";
 import { getAuthenticatedCandidate } from "@/lib/auth/session";
 import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
+import { cacheGetOrSet } from "@/lib/cache";
 
 export async function GET(
   request: NextRequest,
@@ -14,7 +15,11 @@ export async function GET(
     const candRepo = getCandidateRepository();
     const savedRepo = getSavedJobRepository();
 
-    const job = await jobRepo.getById(id);
+    const job = await cacheGetOrSet(
+      `job:${id}`,
+      () => jobRepo.getById(id),
+      { ttlSeconds: 300, tags: ["jobs", `job:${id}`] }
+    );
     if (!job) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
