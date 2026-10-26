@@ -13,7 +13,7 @@ test("Unit: calculateSkillsMatch handles skill normalization and casing", () => 
     optionalSkills: ["GraphQL"],
   };
 
-  const result = calculateSkillsMatch(candidate as any, job as any);
+  const result = calculateSkillsMatch(candidate, job);
   assert.equal(result.matchedRequired.length, 2);
   assert.ok(result.score >= 95, "Matching all required skills should yield top score");
   assert.deepEqual(result.missingSkills, ["GraphQL"]);
@@ -23,6 +23,6 @@ test("Unit: calculateSkillsMatch awards neutral score when job omits required sk
   const candidate = { skills: ["Python", "Django"] };
   const job = { title: "Software Engineer", requiredSkills: [], optionalSkills: [] };
 
-  const result = calculateSkillsMatch(candidate as any, job as any);
+  const result = calculateSkillsMatch(candidate, job);
   assert.ok(result.score >= 70 && result.score <= 80);
 });
