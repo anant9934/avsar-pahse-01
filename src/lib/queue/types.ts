@@ -3,12 +3,14 @@
  */
 
 export type JobStatus = "pending" | "processing" | "completed" | "failed";
+export type JobPriority = "high" | "normal" | "low";
 
 export interface QueueJob<T = unknown> {
   id: string;
   type: string;
   payload: T;
   status: JobStatus;
+  priority?: JobPriority;
   attempts: number;
   maxAttempts: number;
   createdAt: number;
