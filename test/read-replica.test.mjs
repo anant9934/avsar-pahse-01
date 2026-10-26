@@ -8,7 +8,7 @@ import {
   queryRead,
   resetPoolsForTesting,
 } from "../src/lib/db/read-replica.ts";
-import { DatabaseUnavailableError, closePgPool, setGlobalPool } from "../src/lib/db/postgres.ts";
+import { DatabaseUnavailableError, setGlobalPool } from "../src/lib/db/postgres.ts";
 
 test("ReadReplica: detects dedicated replica URL when configured", () => {
   const origRead = process.env.POSTGRES_READ_URL;
