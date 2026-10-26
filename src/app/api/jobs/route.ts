@@ -4,6 +4,7 @@ import { calculateJobMatch } from "@/lib/matching";
 import { checkAdminAuth } from "@/lib/auth/admin";
 import { getAuthenticatedCandidate } from "@/lib/auth/session";
 import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
+import { cacheGetOrSet, cachePurgeTag, generateCacheKey } from "@/lib/cache";
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
     const candRepo = getCandidateRepository();
     const savedRepo = getSavedJobRepository();
 
-    const { jobs: rawJobs } = await jobRepo.list({
+    const cacheKey = generateCacheKey("jobs:raw", {
       q,
       workArrangement,
       employmentType,
@@ -32,6 +33,20 @@ export async function GET(request: NextRequest) {
       verification,
       status,
     });
+
+    const { jobs: rawJobs } = await cacheGetOrSet(
+      cacheKey,
+      () =>
+        jobRepo.list({
+          q,
+          workArrangement,
+          employmentType,
+          category,
+          verification,
+          status,
+        }),
+      { ttlSeconds: 60, tags: ["jobs"] }
+    );
 
     const auth = getAuthenticatedCandidate(request);
     const candidateId = auth?.candidateId || "cand_rohan_sharma_001";
@@ -165,6 +180,7 @@ export async function POST(request: NextRequest) {
     }
 
     const created = await jobRepo.create(body);
+    await cachePurgeTag("jobs");
     return NextResponse.json({ success: true, job: created }, { status: 201 });
   } catch (err: unknown) {
     if (err instanceof DatabaseUnavailableError || err instanceof DatabaseConfigurationError) {
