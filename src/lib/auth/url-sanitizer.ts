@@ -54,3 +54,66 @@ export function sanitizeReturnTo(rawReturnTo: string | null | undefined, default
     return defaultPath;
   }
 }
+
+/**
+ * Sanitize external application links (job application URLs, recruiter contacts).
+ * Strictly permits https://, http://, and mailto: protocols.
+ * Rejects javascript:, data:, vbscript:, file:, control characters, and unparseable URLs.
+ */
+export function sanitizeExternalUrl(rawUrl: string | null | undefined): string | null {
+  if (!rawUrl || typeof rawUrl !== "string") {
+    return null;
+  }
+
+  const trimmed = rawUrl.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  // Reject control characters (0x00 - 0x1F, 0x7F)
+  if (/[\x00-\x1F\x7F]/.test(trimmed)) {
+    return null;
+  }
+
+  // Mailto link check
+  if (trimmed.toLowerCase().startsWith("mailto:")) {
+    const target = trimmed.slice(7).trim();
+    if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(target)) {
+      return `mailto:${target}`;
+    }
+    return null;
+  }
+
+  // Explicitly reject dangerous schemes before URL parsing
+  const lower = trimmed.toLowerCase();
+  if (
+    lower.startsWith("javascript:") ||
+    lower.startsWith("data:") ||
+    lower.startsWith("vbscript:") ||
+    lower.startsWith("file:")
+  ) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    // Only accept https: and http:
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+      return null;
+    }
+
+    // Must have a valid hostname
+    if (!parsed.hostname || parsed.hostname.length < 1) {
+      return null;
+    }
+
+    // Reject usernames or passwords in URLs (e.g. http://attacker@legit.com)
+    if (parsed.username || parsed.password) {
+      return null;
+    }
+
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
