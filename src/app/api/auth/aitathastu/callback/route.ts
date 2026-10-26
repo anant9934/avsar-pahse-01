@@ -7,8 +7,12 @@ import {
   signSessionPayload,
 } from "@/lib/auth/session";
 import { getCandidateRepository } from "@/lib/repository";
+import { enforceRateLimit } from "@/lib/ratelimit";
 
 export async function GET(request: NextRequest) {
+  const rateLimitResponse = await enforceRateLimit(request);
+  if (rateLimitResponse) return rateLimitResponse as NextResponse;
+
   const searchParams = request.nextUrl.searchParams;
   const code = searchParams.get("code");
   const state = searchParams.get("state");
