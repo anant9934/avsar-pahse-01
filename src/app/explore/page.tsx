@@ -143,28 +143,39 @@ export default function ExplorePage() {
   return (
     <MobileShell activeScreenNumber={4} savedCount={savedJobIds.length}>
       <div className="flex-1 flex flex-col pb-6 bg-[#F8F6F1]">
-        {/* Mobile Header */}
-        <MobileHeader
-          title="Explore Opportunities"
-          showBack={true}
-          rightAction={
-            <Link
-              href="/saved"
-              className="w-11 h-11 rounded-full flex items-center justify-center text-[#242720] hover:bg-[#EFECE5] transition-colors relative"
-              aria-label="View Saved Jobs"
-            >
-              <Bookmark className="w-5 h-5 stroke-[1.8px]" aria-hidden="true" />
-              {savedJobIds.length > 0 && (
-                <span
-                  className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-[#285C45]"
-                  aria-hidden="true"
-                />
-              )}
-            </Link>
-          }
-        />
+        {/* Mobile Header (Hidden on desktop) */}
+        <div className="md:hidden">
+          <MobileHeader
+            title="Explore Opportunities"
+            showBack={true}
+            rightAction={
+              <Link
+                href="/saved"
+                className="w-11 h-11 rounded-full flex items-center justify-center text-[#242720] hover:bg-[#EFECE5] transition-colors relative"
+                aria-label="View Saved Jobs"
+              >
+                <Bookmark className="w-5 h-5 stroke-[1.8px]" aria-hidden="true" />
+                {savedJobIds.length > 0 && (
+                  <span
+                    className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-[#285C45]"
+                    aria-hidden="true"
+                  />
+                )}
+              </Link>
+            }
+          />
+        </div>
 
         <div className="px-4 pt-3 flex flex-col gap-3.5">
+          {/* Desktop Title Banner */}
+          <div className="hidden md:flex flex-col gap-1 mb-1">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#242720] tracking-tight">
+              Explore Opportunities
+            </h1>
+            <p className="text-xs sm:text-sm text-[#77786F]">
+              Browse 130+ verified engineering roles, internships, and high-growth opportunities matched to your real skills.
+            </p>
+          </div>
           {/* Search bar with filter icon button */}
           <div className="relative flex items-center gap-2">
             <div className="relative flex-1">
@@ -264,8 +275,8 @@ export default function ExplorePage() {
 
           {/* Job Listings List or Shimmer Skeletons */}
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 mt-1" aria-busy="true" aria-label="Loading opportunities">
-              {[1, 2, 3, 4].map((i) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-1" aria-busy="true" aria-label="Loading opportunities">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div
                   key={i}
                   className="card-surface p-4 bg-white flex flex-col gap-3 min-h-[148px]"
@@ -288,7 +299,7 @@ export default function ExplorePage() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 mt-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-1">
               {jobs.map((job) => (
                 <JobCard
                   key={job.id}
