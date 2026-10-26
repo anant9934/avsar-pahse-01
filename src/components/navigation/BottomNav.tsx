@@ -54,9 +54,7 @@ export function BottomNav({ savedCount, appliedCount, fluid = false }: BottomNav
   return (
     <nav
       aria-label="Bottom Navigation"
-      className={`fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#ECEAE3] w-full ${
-        fluid ? "max-w-4xl" : "max-w-[420px]"
-      } mx-auto shadow-sm`}
+      className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#ECEAE3] w-full max-w-lg mx-auto shadow-sm"
     >
       <div className="flex items-center justify-around h-16 px-2 safe-area-bottom">
         {navItems.map((item) => {
