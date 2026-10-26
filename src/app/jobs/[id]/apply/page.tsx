@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { MobileHeader } from "@/components/navigation/MobileHeader";
+import { useThrottledCallback } from "@/hooks";
 import type { Job, Candidate, Resume } from "@/types";
 
 function ApplicationFlowContent({
@@ -113,8 +114,8 @@ function ApplicationFlowContent({
     }
   };
 
-  // Submit Application
-  const handleSubmitApplication = async () => {
+  // Submit Application with double-click throttling
+  const handleSubmitApplication = useThrottledCallback(async () => {
     if (!declaredConsent) {
       setSubmitError("Please confirm the accuracy declaration before submitting.");
       return;
@@ -158,7 +159,7 @@ function ApplicationFlowContent({
       setSubmitError(msg);
       setSubmitting(false);
     }
-  };
+  }, 1000);
 
   const selectedResume = resumes.find((r) => r.id === selectedResumeId) || resumes[0];
 
