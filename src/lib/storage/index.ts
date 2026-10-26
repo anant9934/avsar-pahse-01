@@ -47,12 +47,14 @@ export function getStorageProvider(): StorageProvider {
   const hasS3Bucket = Boolean(process.env.STORAGE_BUCKET || process.env.S3_BUCKET);
   const isProduction = process.env.NODE_ENV === "production";
 
+  const allowEphemeral = process.env.ALLOW_EPHEMERAL_LOCAL_STORAGE === "true";
+
   if (requestedProvider === "s3" || (requestedProvider === "" && hasS3Bucket)) {
     try {
       activeStorageProvider = new S3StorageProvider();
       return activeStorageProvider;
     } catch (err) {
-      if (isProduction) {
+      if (isProduction && !allowEphemeral) {
         throw new Error(
           `Production S3 storage provider failed to initialize: ${err instanceof Error ? err.message : String(err)}`
         );
@@ -61,8 +63,22 @@ export function getStorageProvider(): StorageProvider {
     }
   }
 
+  if (isProduction && !allowEphemeral) {
+    throw new Error(
+      "Production deployment requires durable cloud object storage (STORAGE_BUCKET or S3_BUCKET). Local ephemeral filesystem storage is prohibited to prevent document loss. Set ALLOW_EPHEMERAL_LOCAL_STORAGE=true to explicitly override in non-production environments."
+    );
+  }
+
   activeStorageProvider = new LocalStorageProvider();
   return activeStorageProvider;
+}
+
+/**
+ * Check whether ephemeral local file storage is explicitly allowed in current environment
+ */
+export function isEphemeralStorageAllowed(): boolean {
+  if (process.env.NODE_ENV !== "production") return true;
+  return process.env.ALLOW_EPHEMERAL_LOCAL_STORAGE === "true";
 }
 
 /**
