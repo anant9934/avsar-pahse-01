@@ -390,7 +390,7 @@ export default function CandidateProfilePage() {
                               <p className="font-bold text-[#242720]">{proj.title}</p>
                               <p className="text-[11px] text-[#44463E] mt-0.5">{proj.description}</p>
                               <div className="flex flex-wrap gap-1 mt-1.5">
-                                {proj.technologies.map((t) => (
+                                {(proj.technologies || proj.techStack || []).map((t) => (
                                   <span key={t} className="text-[10px] bg-[#EAF4EB] text-[#285C45] px-1.5 py-0.5 rounded">
                                     {t}
                                   </span>

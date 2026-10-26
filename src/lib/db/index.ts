@@ -302,7 +302,7 @@ export const db = {
       postedAt: "Just now",
     };
     data.jobs.unshift(newJob);
-    data.adminMetrics.totalJobs += 1;
+    data.adminMetrics.totalJobs = (data.adminMetrics.totalJobs ?? 0) + 1;
     saveDb(data);
     return newJob;
   },

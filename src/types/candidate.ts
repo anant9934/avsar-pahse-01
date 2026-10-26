@@ -1,33 +1,44 @@
+import type { WorkArrangement } from "./job.ts";
+
 export interface WorkExperience {
   id: string;
   role: string;
   company: string;
-  duration: string;
+  startDate?: string;
+  endDate?: string;
+  current?: boolean;
+  duration?: string;
   description: string;
 }
 
 export interface Education {
   id: string;
+  institution: string;
   degree: string;
   field: string;
-  institution: string;
   startYear: string;
   endYear: string;
+  gpa?: string;
 }
 
 export interface Project {
   id: string;
   title: string;
-  techStack: string[];
   description: string;
+  technologies?: string[];
+  techStack?: string[];
+  link?: string;
   githubUrl?: string;
   liveUrl?: string;
 }
 
 export interface CandidatePreferences {
-  targetRoles: string[];
+  targetRole?: string;
+  targetRoles?: string[];
   preferredLocation: string;
-  preferredArrangement: "Hybrid" | "Remote" | "Onsite" | "Any";
+  workArrangement?: WorkArrangement;
+  preferredArrangement?: "Hybrid" | "Remote" | "Onsite" | "Any";
+  minExpectedSalary?: string;
   salaryExpectation?: string;
 }
 
