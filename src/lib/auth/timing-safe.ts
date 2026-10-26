@@ -1,16 +1,19 @@
-import { timingSafeEqual } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 
 /**
- * Constant-time string comparison to prevent side-channel timing attacks
+ * Constant-time string comparison to prevent side-channel timing attacks.
+ * Pre-hashes inputs using SHA-256 to guarantee fixed 32-byte buffers,
+ * completely eliminating early-return secret length leakage.
  */
-export function safeCompare(a: string, b: string): boolean {
+export function safeCompare(a: string | null | undefined, b: string | null | undefined): boolean {
+  if (typeof a !== "string" || typeof b !== "string") {
+    return false;
+  }
+
   try {
-    const bufA = Buffer.from(a, "utf-8");
-    const bufB = Buffer.from(b, "utf-8");
-    if (bufA.length !== bufB.length) {
-      return false;
-    }
-    return timingSafeEqual(bufA, bufB);
+    const hashA = createHash("sha256").update(a, "utf-8").digest();
+    const hashB = createHash("sha256").update(b, "utf-8").digest();
+    return timingSafeEqual(hashA, hashB);
   } catch {
     return false;
   }
