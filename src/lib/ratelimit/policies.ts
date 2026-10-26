@@ -29,7 +29,7 @@ export const RATE_LIMIT_POLICIES = {
   /** Resume document uploads (protects object storage compute and upload bandwidth) */
   resumes: {
     windowMs: 60 * 1000,
-    maxRequests: 10,
+    maxRequests: 30,
     prefix: "rl:resume",
   } satisfies RateLimitConfig,
 
