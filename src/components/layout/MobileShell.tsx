@@ -36,23 +36,22 @@ export function MobileShell({
   hideDesktopNav = false,
 }: MobileShellProps) {
   const pathname = usePathname();
-  const [deviceMode, setDeviceMode] = useState<"phone" | "fluid">("fluid");
-  const [showSuiteBar, setShowSuiteBar] = useState(false);
-  const [fetchedAppliedCount, setFetchedAppliedCount] = useState<number | undefined>(undefined);
-  const [fetchedSavedCount, setFetchedSavedCount] = useState<number | undefined>(undefined);
-
-  // Check URL parameters for developer suite testing harness mode
-  useEffect(() => {
+  const [deviceMode, setDeviceMode] = useState<"phone" | "fluid">(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
-      if (params.get("suite") === "true" || params.get("demo") === "true") {
-        setShowSuiteBar(true);
-      }
-      if (params.get("mode") === "phone") {
-        setDeviceMode("phone");
-      }
+      if (params.get("mode") === "phone") return "phone";
     }
-  }, []);
+    return "fluid";
+  });
+  const [showSuiteBar, setShowSuiteBar] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("suite") === "true" || params.get("demo") === "true";
+    }
+    return false;
+  });
+  const [fetchedAppliedCount, setFetchedAppliedCount] = useState<number | undefined>(undefined);
+  const [fetchedSavedCount, setFetchedSavedCount] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     if (appliedCount !== undefined) return;
