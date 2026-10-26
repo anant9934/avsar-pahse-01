@@ -15,8 +15,9 @@ jobs:
     name: Test, Lint, Typecheck & Build
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [20.x, 22.x]
+        node-version: [22.x, 24.x]
 
     steps:
       - name: Checkout Source Code
@@ -30,6 +31,17 @@ jobs:
 
       - name: Install Clean Dependencies
         run: npm ci
+
+      - name: Start Next.js Development Server for Integration Tests
+        run: |
+          npm run dev &
+          for i in {1..30}; do
+            if curl -s http://localhost:3000/api/health/live > /dev/null; then
+              echo "Next.js dev server ready on http://localhost:3000"
+              break
+            fi
+            sleep 1
+          done
 
       - name: Execute Test Suite
         run: npm test
