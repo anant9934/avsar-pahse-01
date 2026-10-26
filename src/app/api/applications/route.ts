@@ -1,16 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { getApplicationRepository } from "@/lib/repository";
+import { getAuthenticatedCandidate } from "@/lib/auth/session";
+import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
 
-export async function GET() {
-  const applications = db.getApplications();
-  return NextResponse.json({
-    total: applications.length,
-    applications,
-  });
+export async function GET(request: NextRequest) {
+  try {
+    const auth = getAuthenticatedCandidate(request);
+    if (!auth) {
+      return NextResponse.json(
+        { error: "Unauthorized: Candidate session required to view applications." },
+        { status: 401 }
+      );
+    }
+
+    const appRepo = getApplicationRepository();
+    const applications = await appRepo.listByCandidate(auth.candidateId);
+
+    return NextResponse.json({
+      total: applications.length,
+      applications,
+    });
+  } catch (err: unknown) {
+    if (err instanceof DatabaseUnavailableError || err instanceof DatabaseConfigurationError) {
+      return NextResponse.json(
+        { error: "Database service temporarily unavailable. Please try again shortly." },
+        { status: 503 }
+      );
+    }
+    const msg = err instanceof Error ? err.message : "Internal server error";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = getAuthenticatedCandidate(request);
+    if (!auth) {
+      return NextResponse.json(
+        { error: "Unauthorized: Candidate session required to submit an application." },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { jobId, resumeId, answers } = body;
 
@@ -18,10 +49,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Job ID is required" }, { status: 400 });
     }
 
-    const result = db.submitApplication({
+    // Always resolve candidate ID from verified server session, never trusting client payload
+    const appRepo = getApplicationRepository();
+    const result = await appRepo.submit({
       jobId,
       resumeId: resumeId || "res_1",
       answers: answers || {},
+      candidateId: auth.candidateId,
     });
 
     if (!result.success) {
@@ -36,7 +70,13 @@ export async function POST(request: NextRequest) {
       application: result.application,
     });
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
+    if (err instanceof DatabaseUnavailableError || err instanceof DatabaseConfigurationError) {
+      return NextResponse.json(
+        { error: "Database service temporarily unavailable. Please try again shortly." },
+        { status: 503 }
+      );
+    }
+    const msg = err instanceof Error ? err.message : "Internal server error";
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
