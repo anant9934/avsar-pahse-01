@@ -1,4 +1,4 @@
-import type { Job, SalaryDetails, WorkArrangement, EmploymentType } from "../../types/index.ts";
+import type { Job, WorkArrangement, EmploymentType } from "../../types/index.ts";
 import { parseMultiJsonBlocks } from "./json-parser.ts";
 import { slugify, generateStableJobId } from "./slugs.ts";
 import { normalizeCompanyLogoKey } from "./logos.ts";
