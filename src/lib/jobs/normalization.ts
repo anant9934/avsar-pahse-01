@@ -1,201 +1,19 @@
-import type { Job, SalaryDetails, WorkArrangement, EmploymentType } from "@/types";
+import type { Job, SalaryDetails, WorkArrangement, EmploymentType } from "../../types/index.ts";
+import { parseMultiJsonBlocks } from "./json-parser.ts";
+import { slugify, generateStableJobId } from "./slugs.ts";
+import { normalizeCompanyLogoKey } from "./logos.ts";
+import { formatCompensation } from "./salary.ts";
+import { formatDeadline, isDeadlineExpired } from "./deadlines.ts";
 
-/**
- * Robust JSON block parser capable of handling multiple concatenated JSON blocks
- * (such as root-level array followed by metadata object in jobs.json)
- */
-export function parseMultiJsonBlocks(text: string): unknown[] {
-  const blocks: unknown[] = [];
-  let depth = 0;
-  let inString = false;
-  let escape = false;
-  let start = -1;
-
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (inString) {
-      if (escape) {
-        escape = false;
-      } else if (ch === "\\") {
-        escape = true;
-      } else if (ch === '"') {
-        inString = false;
-      }
-      continue;
-    }
-
-    if (ch === '"') {
-      inString = true;
-      continue;
-    }
-
-    if (ch === "{" || ch === "[") {
-      if (depth === 0) start = i;
-      depth++;
-    } else if (ch === "}" || ch === "]") {
-      depth--;
-      if (depth === 0 && start !== -1) {
-        const snippet = text.slice(start, i + 1).trim();
-        try {
-          blocks.push(JSON.parse(snippet));
-        } catch (err) {
-          console.error("Failed to parse JSON block at position", start, err);
-        }
-        start = -1;
-      }
-    }
-  }
-
-  return blocks;
-}
-
-export function slugify(str: string): string {
-  return str
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-/**
- * Normalizes company logo key to known Avsar icon assets
- */
-export function normalizeCompanyLogoKey(company: string): string {
-  const c = company.toLowerCase().replace(/[^a-z0-9]/g, "");
-  if (c.includes("google")) return "google";
-  if (c.includes("tatadigital") || c.includes("tata")) return "tatadigital";
-  if (c.includes("flipkart")) return "flipkart";
-  if (c.includes("zoho")) return "zoho";
-  if (c.includes("swiggy")) return "swiggy";
-  if (c.includes("barclays")) return "barclays";
-  if (c.includes("siemens")) return "siemens";
-  if (c.includes("amazon")) return "amazon";
-  if (c.includes("deloitte")) return "deloitte";
-  if (c.includes("pwc")) return "pwc";
-  if (c.includes("walmart")) return "walmart";
-  if (c.includes("accenture")) return "accenture";
-  if (c.includes("cognizant")) return "cognizant";
-  return "default";
-}
-
-/**
- * Formats salary details and textual compensation display cleanly
- */
-export function formatCompensation(
-  salary: unknown,
-  stipend: unknown,
-  ctcClaim: unknown,
-  salaryClaim: unknown,
-  defaultCurrency = "INR"
-): { compensation: string; salaryDetails?: SalaryDetails; ctcClaim?: SalaryDetails } {
-  let primaryDetails: SalaryDetails | undefined;
-  let formattedCtc: SalaryDetails | undefined;
-
-  // 1. Structured stipend (e.g. from Block 2)
-  if (stipend && typeof stipend === "object") {
-    const s = stipend as { min?: number; max?: number; currency?: string; period?: string };
-    const curSymbol = s.currency === "INR" || !s.currency ? "₹" : `${s.currency} `;
-    const periodStr = s.period ? `/${s.period}` : "/month";
-    primaryDetails = {
-      min: s.min,
-      max: s.max,
-      currency: s.currency || defaultCurrency,
-      period: s.period || "month",
-    };
-    if (s.min && s.max && s.min === s.max) {
-      return {
-        compensation: `${curSymbol}${s.min.toLocaleString("en-IN")}${periodStr}`,
-        salaryDetails: primaryDetails,
-      };
-    } else if (s.min && s.max) {
-      return {
-        compensation: `${curSymbol}${s.min.toLocaleString("en-IN")} - ${curSymbol}${s.max.toLocaleString("en-IN")}${periodStr}`,
-        salaryDetails: primaryDetails,
-      };
-    }
-  }
-
-  // 2. Structured CTC claim (e.g. year period)
-  if (ctcClaim && typeof ctcClaim === "object") {
-    const c = ctcClaim as { min?: number; max?: number; currency?: string; period?: string };
-    formattedCtc = {
-      min: c.min,
-      max: c.max,
-      currency: c.currency || defaultCurrency,
-      period: c.period || "year",
-    };
-    const minLPA = c.min ? c.min / 100000 : undefined;
-    const maxLPA = c.max ? c.max / 100000 : undefined;
-    let label = "Competitive CTC";
-    if (minLPA && maxLPA && minLPA === maxLPA) {
-      label = `₹${minLPA} LPA`;
-    } else if (minLPA && maxLPA) {
-      label = `₹${minLPA} - ₹${maxLPA} LPA`;
-    } else if (minLPA) {
-      label = `₹${minLPA}+ LPA`;
-    }
-    return {
-      compensation: label,
-      salaryDetails: formattedCtc,
-      ctcClaim: formattedCtc,
-    };
-  }
-
-  // 3. Structured salary claim (e.g. monthly range claim)
-  if (salaryClaim && typeof salaryClaim === "object") {
-    const sc = salaryClaim as { min?: number; max?: number; currency?: string; period?: string };
-    const curSymbol = sc.currency === "INR" || !sc.currency ? "₹" : `${sc.currency} `;
-    const periodStr = sc.period ? `/${sc.period}` : "/month";
-    primaryDetails = {
-      min: sc.min,
-      max: sc.max,
-      currency: sc.currency || defaultCurrency,
-      period: sc.period || "month",
-      rawClaim: "Source unverified salary range",
-    };
-    if (sc.min && sc.max && sc.min === sc.max) {
-      return {
-        compensation: `${curSymbol}${sc.min.toLocaleString("en-IN")}${periodStr}`,
-        salaryDetails: primaryDetails,
-      };
-    } else if (sc.min && sc.max) {
-      return {
-        compensation: `${curSymbol}${sc.min.toLocaleString("en-IN")} - ${curSymbol}${sc.max.toLocaleString("en-IN")}${periodStr}`,
-        salaryDetails: primaryDetails,
-      };
-    }
-  }
-
-  // 4. Raw string claim from source (e.g. Barclays "12 LPA supplied by user", PwC "₹30,000 per month...")
-  if (typeof salary === "string" && salary.trim()) {
-    return {
-      compensation: salary.trim(),
-      salaryDetails: { rawClaim: salary.trim() },
-    };
-  }
-
-  // 5. Default when no salary or null
-  return {
-    compensation: "Competitive / Disclosed on Application",
-  };
-}
-
-/**
- * Formats deadline date string into human-friendly format (e.g. "2026-10-30" -> "30 Oct 2026")
- */
-export function formatDeadline(rawDeadline?: string | null): string {
-  if (!rawDeadline) return "Rolling / Open";
-  try {
-    const date = new Date(rawDeadline);
-    if (!isNaN(date.getTime())) {
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
-    }
-  } catch {
-    // fallback
-  }
-  return rawDeadline;
-}
+export {
+  parseMultiJsonBlocks,
+  slugify,
+  generateStableJobId,
+  normalizeCompanyLogoKey,
+  formatCompensation,
+  formatDeadline,
+  isDeadlineExpired,
+};
 
 /**
  * Normalizes a single raw record from jobs.json into Avsar's Job model
@@ -214,15 +32,7 @@ export function normalizeJobRecord(
 
   // Generate stable deterministic ID
   const rawJobId = typeof raw.job_id === "string" && raw.job_id.trim() ? raw.job_id.trim() : undefined;
-  const companySlug = slugify(company);
-  const roleSlug = slugify(role);
-  const stableId = rawJobId
-    ? `job_${companySlug}_${slugify(rawJobId)}`
-    : `job_${companySlug}_${roleSlug}`;
-
-  const slug = rawJobId
-    ? `${roleSlug}-${companySlug}-${slugify(rawJobId)}`
-    : `${roleSlug}-${companySlug}`;
+  const { id: stableId, slug } = generateStableJobId(company, role, rawJobId);
 
   // Work arrangement
   let workArrangement: WorkArrangement = "Hybrid";
@@ -318,11 +128,8 @@ export function normalizeJobRecord(
   // Check if possibly closed
   let isPossiblyClosed = verificationStatus === "POSSIBLY_CLOSED";
   const deadlineStr = typeof raw.deadline === "string" ? raw.deadline.trim() : null;
-  if (deadlineStr) {
-    const parsedDeadline = new Date(deadlineStr).getTime();
-    if (!isNaN(parsedDeadline) && parsedDeadline < Date.now()) {
-      isPossiblyClosed = true;
-    }
+  if (isDeadlineExpired(deadlineStr)) {
+    isPossiblyClosed = true;
   }
   if (verificationNote && verificationNote.toLowerCase().includes("deadline was")) {
     isPossiblyClosed = true;
