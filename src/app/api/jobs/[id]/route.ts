@@ -3,7 +3,7 @@ import { getJobRepository, getCandidateRepository, getSavedJobRepository } from 
 import { calculateJobMatch } from "@/lib/matching";
 import { getAuthenticatedCandidate } from "@/lib/auth/session";
 import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
-import { cacheGetOrSet } from "@/lib/cache";
+import { cacheGetOrSet, generateETag, isNotModified, buildCacheControlHeader } from "@/lib/cache";
 
 export async function GET(
   request: NextRequest,
@@ -36,11 +36,30 @@ export async function GET(
       : { overallScore: 75, ratingLabel: "Good Match", eligibility: { isEligible: true, reason: "" } };
     const isSaved = candidate ? await savedRepo.isSaved(candidate.id, job.id) : false;
 
-    return NextResponse.json({
+    const responsePayload = {
       job,
       match,
       isSaved,
-    });
+    };
+
+    const headers = new Headers();
+    const etag = generateETag(responsePayload);
+    headers.set("ETag", etag);
+
+    if (auth) {
+      headers.set("Cache-Control", buildCacheControlHeader({ isPrivate: true }));
+    } else {
+      headers.set(
+        "Cache-Control",
+        buildCacheControlHeader({ maxAge: 30, sMaxAge: 300, staleWhileRevalidate: 600 })
+      );
+    }
+
+    if (isNotModified(request.headers, etag)) {
+      return new NextResponse(null, { status: 304, headers });
+    }
+
+    return NextResponse.json(responsePayload, { headers });
   } catch (err: unknown) {
     if (err instanceof DatabaseUnavailableError || err instanceof DatabaseConfigurationError) {
       return NextResponse.json(
