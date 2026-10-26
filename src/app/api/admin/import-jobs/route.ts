@@ -6,6 +6,7 @@ import { ingestJobsDataset } from "@/lib/jobs/ingestion";
 import { normalizeJobRecord } from "@/lib/jobs/normalization";
 import type { Job } from "@/types";
 import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
+import { cachePurgeTag } from "@/lib/cache";
 
 export async function POST(request: NextRequest) {
   try {
@@ -60,6 +61,11 @@ export async function POST(request: NextRequest) {
         });
       } catch {
         // Audit log best-effort
+      }
+
+      if (!isPreview) {
+        await cachePurgeTag("jobs");
+        await cachePurgeTag("metrics");
       }
 
       return NextResponse.json({
@@ -176,6 +182,11 @@ export async function POST(request: NextRequest) {
         });
       } catch {
         // Audit log best-effort
+      }
+
+      if (!isPreview && (createdCount > 0 || updatedCount > 0)) {
+        await cachePurgeTag("jobs");
+        await cachePurgeTag("metrics");
       }
     }
 
