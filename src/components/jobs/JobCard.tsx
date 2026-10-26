@@ -83,13 +83,38 @@ export function JobCard({
       </div>
 
       {/* Middle row: Metadata tags */}
-      <div className="flex flex-wrap items-center gap-2 mt-3 text-xs font-medium text-[#55564F]">
+      <div className="flex flex-wrap items-center gap-1.5 mt-3 text-xs font-medium text-[#55564F]">
         <span className="bg-[#F4F2EC] px-2.5 py-1 rounded-md text-[#363830]">
           {job.employmentType}
         </span>
         {job.compensation && (
           <span className="bg-[#F4F2EC] px-2.5 py-1 rounded-md font-semibold text-[#285C45]">
             {job.compensation}
+          </span>
+        )}
+        {job.isPossiblyClosed && (
+          <span className="bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md text-[11px] font-bold">
+            ⏳ Possibly Closed
+          </span>
+        )}
+        {!job.isPossiblyClosed && job.verificationStatus === "VERIFIED" && (
+          <span className="bg-[#EBF3ED] text-[#285C45] px-2 py-0.5 rounded-md text-[11px] font-semibold">
+            ✓ Verified
+          </span>
+        )}
+        {!job.isPossiblyClosed && job.verificationStatus === "PARTIALLY_VERIFIED" && (
+          <span className="bg-amber-50 text-amber-700 border border-amber-200/60 px-2 py-0.5 rounded-md text-[11px] font-semibold">
+            ⚡ Partial
+          </span>
+        )}
+        {!job.isPossiblyClosed && job.verificationStatus === "UNVERIFIED" && (
+          <span className="bg-[#F2EFE9] text-[#77786F] px-2 py-0.5 rounded-md text-[11px]">
+            Alert
+          </span>
+        )}
+        {job.graduationYears && job.graduationYears.length > 0 && (
+          <span className="bg-[#FAF9F5] border border-[#EAE7DF] text-[#55564F] px-2 py-0.5 rounded-md text-[11px]">
+            Batch {job.graduationYears.map((y) => `'${String(y).slice(-2)}`).join(", ")}
           </span>
         )}
       </div>
@@ -116,13 +141,15 @@ export function JobCard({
           type="button"
           onClick={handleBookmark}
           disabled={isSaving}
-          aria-label={isSaved ? "Remove from saved" : "Save job"}
-          className={`p-1.5 rounded-full hover:bg-[#F2EFE9] transition-colors ${
+          aria-label={isSaved ? `Remove ${job.title} from saved` : `Save ${job.title}`}
+          aria-pressed={isSaved}
+          className={`w-11 h-11 -mr-2 -my-2 flex items-center justify-center rounded-full hover:bg-[#F2EFE9] transition-colors ${
             isSaved ? "text-[#285C45]" : "text-[#9E9F96] hover:text-[#242720]"
           }`}
         >
           <Bookmark
             className={`w-4 h-4 ${isSaved ? "fill-[#285C45]" : ""}`}
+            aria-hidden="true"
           />
         </button>
       </div>
