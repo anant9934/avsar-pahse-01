@@ -81,13 +81,14 @@ function SuccessContent() {
           <button
             type="button"
             onClick={handleCopy}
-            className="p-2 rounded-xl hover:bg-[#F4F1EA] text-[#77786F] hover:text-[#242720] transition-colors"
+            className="w-11 h-11 rounded-xl flex items-center justify-center hover:bg-[#F4F1EA] text-[#77786F] hover:text-[#242720] transition-colors"
             title="Copy reference code"
+            aria-label={copied ? "Reference code copied" : "Copy reference code"}
           >
             {copied ? (
-              <CheckCheck className="w-4 h-4 text-[#285C45]" />
+              <CheckCheck className="w-5 h-5 text-[#285C45]" aria-hidden="true" />
             ) : (
-              <Copy className="w-4 h-4" />
+              <Copy className="w-5 h-5" aria-hidden="true" />
             )}
           </button>
         </div>
