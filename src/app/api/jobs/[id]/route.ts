@@ -1,25 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { getJobRepository, getCandidateRepository, getSavedJobRepository } from "@/lib/repository";
 import { calculateJobMatch } from "@/lib/matching";
+import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
 
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await context.params;
-  const job = db.getJobById(id);
+  try {
+    const { id } = await context.params;
+    const jobRepo = getJobRepository();
+    const candRepo = getCandidateRepository();
+    const savedRepo = getSavedJobRepository();
 
-  if (!job) {
-    return NextResponse.json({ error: "Job not found" }, { status: 404 });
+    const job = await jobRepo.getById(id);
+    if (!job) {
+      return NextResponse.json({ error: "Job not found" }, { status: 404 });
+    }
+
+    const candidate = (await candRepo.getById("cand_rohan_sharma_001")) || (await candRepo.listAll())[0];
+    const match = candidate ? calculateJobMatch(candidate, job) : { overallScore: 75, ratingLabel: "Good Match", eligibility: { isEligible: true, reason: "" } };
+    const isSaved = candidate ? await savedRepo.isSaved(candidate.id, job.id) : false;
+
+    return NextResponse.json({
+      job,
+      match,
+      isSaved,
+    });
+  } catch (err: unknown) {
+    if (err instanceof DatabaseUnavailableError || err instanceof DatabaseConfigurationError) {
+      return NextResponse.json(
+        { error: "Database service temporarily unavailable. Please try again shortly." },
+        { status: 503 }
+      );
+    }
+    const msg = err instanceof Error ? err.message : "Internal server error";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
-
-  const candidate = db.getCandidate();
-  const match = calculateJobMatch(candidate, job);
-  const isSaved = db.isJobSaved(job.id);
-
-  return NextResponse.json({
-    job,
-    match,
-    isSaved,
-  });
 }
