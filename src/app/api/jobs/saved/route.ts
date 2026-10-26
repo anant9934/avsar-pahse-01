@@ -65,14 +65,18 @@ export async function POST(request: NextRequest) {
     const savedRepo = getSavedJobRepository();
     const result = await savedRepo.toggle(auth.candidateId, jobId);
 
-    // Asynchronously dispatch background audit event
-    await enqueueJob("audit_log", {
-      actorType: "candidate",
-      actorId: auth.candidateId,
-      action: result.isSaved ? "save_job" : "unsave_job",
-      resourceType: "job",
-      resourceId: jobId,
-    });
+    // Asynchronously dispatch background audit event with high priority
+    await enqueueJob(
+      "audit_log",
+      {
+        actorType: "candidate",
+        actorId: auth.candidateId,
+        action: result.isSaved ? "save_job" : "unsave_job",
+        resourceType: "job",
+        resourceId: jobId,
+      },
+      { priority: "high" }
+    );
 
     return NextResponse.json(result);
   } catch (err: unknown) {
