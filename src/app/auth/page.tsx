@@ -53,7 +53,7 @@ export default function AuthPage() {
 
   return (
     <MobileShell showBottomNav={false} activeScreenNumber={2}>
-      <div className="flex-1 flex flex-col justify-between px-6 pt-4 pb-8 bg-[#F8F6F1]">
+      <div className="flex-1 flex flex-col justify-between px-6 pt-4 pb-8 bg-[#F8F6F1] md:max-w-md md:w-full md:mx-auto md:my-8 md:bg-white md:border md:border-[#ECEAE3] md:rounded-3xl md:p-8 md:shadow-xs">
         {/* Top bar with back and help icon */}
         <div className="flex items-center justify-between">
           <button
