@@ -31,6 +31,12 @@ export interface StorageProvider {
 }
 
 export { validateDocumentMagicBytes, LocalStorageProvider, S3StorageProvider };
+export {
+  reconcileStorageKeys,
+  auditStorageIntegrity,
+  type DbResumeEntry,
+  type StorageReconciliationReport,
+} from "./reconciliation.ts";
 
 let activeStorageProvider: StorageProvider | null = null;
 
