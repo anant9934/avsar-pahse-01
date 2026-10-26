@@ -1,36 +1,163 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# avsar-pahse-01
 
-## Getting Started
+# Avsar — Opportunity Discovery & Intelligent Career Matching Platform
 
-First, run the development server:
+> **Engineered by AI Tathastu**  
+> **Lead Engineer & Author:** Anant Kumar ([@anant9934](https://github.com/anant9934))  
+> **Repository:** [https://github.com/anant9934/avsar-pahse-01.git](https://github.com/anant9934/avsar-pahse-01.git)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 🌟 Executive Overview
+
+**Avsar** (अवसर — *Opportunity*) is a career exploration, deterministic job matching, and application tracking platform engineered specifically for early-career software engineers and university graduates. 
+
+Avsar bridges the gap between aspiring technologists and top-tier engineering organizations through a mathematical, multi-dimensional matching engine that evaluates candidate skills, experience levels, location compatibility, and graduation year eligibility without hallucination or opaque scoring.
+
+---
+
+## 🏛️ Key System Highlights
+
+- **🎯 Deterministic Matching Engine**: 100-point transparent score computed across 4 dimensions:
+  - **Skills Overlap (50 pts)**: Weighted Jaccard & substring similarity over required vs. candidate skills.
+  - **Experience Alignment (20 pts)**: Mathematical proximity to job minimum and maximum experience brackets.
+  - **Location Compatibility (15 pts)**: Full credit for Remote/Anywhere, high affinity for city matches.
+  - **Batch & Education (15 pts)**: Strict graduation year eligibility constraints with human-readable explanations.
+- **💼 Verified Dataset Ingestion**: Ingests, normalizes, deduplicates, and validates **54 verified software jobs** from the real `jobs.json` dataset, preserving source IDs, batch restrictions, and external application URLs.
+- **🔐 AI Tathastu Single Sign-On (SSO)**:
+  - RFC 7636 OAuth 2.0 with PKCE (Proof Key for Code Exchange).
+  - Timing-safe HMAC-SHA256 session signature verification.
+  - Role-based access control (`candidate` and `admin`).
+- **💾 Dual-Persistence Architecture**:
+  - **Production**: PostgreSQL with connection pooling (`pg.Pool`), normalized relational schema, and ACID transactions.
+  - **Local / Edge**: High-performance JSON-backed file repository (`data/db.json`) for seamless zero-dependency local development.
+- **🛡️ Enterprise Security & Hardening**:
+  - **Magic Bytes Validation**: Verifies binary headers (`%PDF`, `PK\x03\x04`) on all resume uploads.
+  - **BOLA / IDOR Prevention**: Strict candidate identity checks on resume and application endpoints.
+  - **SSRF & Open Redirect Shield**: Whitelisted URI destinations and loopback/private subnet blocking.
+  - **Rate Limiting & Masked Audit Logs**: In-memory token bucket rate limiting and privacy-preserving audit logs.
+- **📱 Premium Mobile-First Design System**:
+  - Warm ivory surfaces (`#FAF8F5`), forest green primary accents (`#1B4332`), and warm cream cards.
+  - WCAG 2.1 AA compliant typography, 44px minimum touch targets, and accessible ARIA attributes.
+
+---
+
+## 📂 Architecture & Directory Map
+
+```text
+avsar/
+├── data/
+│   ├── db.json                     # Persistent JSON repository (54 verified jobs, candidate state)
+│   └── resumes/                    # Private local resume vault (gitignored)
+├── docs/                           # Comprehensive Engineering Documentation
+│   ├── ARCHITECTURE.md             # Subsystem design & architecture diagrams
+│   ├── DESIGN_SYSTEM.md           # Tokens, typography scales, & WCAG specifications
+│   ├── MATCHING_ALGORITHM.md      # Deterministic formulas, weights, & eligibility rules
+│   ├── AI_TATHASTU_SSO.md          # OAuth 2.0 PKCE, session security, & claim verification
+│   ├── DATABASE_MIGRATION.md      # PostgreSQL schema, connection pooling, & migration CLI
+│   └── SECURITY_AUDIT.md          # OWASP Top 10 mitigations & audit logging
+├── scripts/
+│   └── migrate-to-postgres.mjs    # Idempotent database migration script
+├── src/
+│   ├── app/                        # Next.js 16 App Router pages & API handlers
+│   │   ├── (candidate routes)      # explore, jobs/[slug], apply, profile, applications, saved
+│   │   ├── admin/                  # Administrative metrics & job management portal
+│   │   └── api/                    # RESTful endpoints for auth, jobs, resumes, applications
+│   ├── components/                 # Reusable UI components (JobCard, MobileShell, BottomNav, etc.)
+│   ├── lib/
+│   │   ├── auth/                   # PKCE, timing-safe equality, rate limiting, audit logger
+│   │   ├── db/                     # PostgreSQL pool, schema.sql, and JSON file DB adapter
+│   │   ├── jobs/                   # Job normalization, deduplication, and ingestion pipeline
+│   │   ├── matching/               # Deterministic scoring sub-engines (skills, exp, loc, batch)
+│   │   ├── repository/             # Dual repository pattern implementation (Postgres & File)
+│   │   └── storage/                # Magic bytes validator and multi-provider resume storage
+│   └── types/                      # Strictly typed domain models (Job, Candidate, Application, etc.)
+└── test/                           # Automated Test Suite (64/64 passing)
+    ├── *.test.mjs                  # Integration test suites for critical candidate journeys
+    └── unit/*.test.mjs             # Unit test suites for matching, storage, and security
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Quickstart & Local Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Prerequisites
+- **Node.js**: v18.18.0 or higher
+- **npm**: v9.0.0 or higher
+- **PostgreSQL** *(optional for local dev, mandatory for production)*
 
-## Learn More
+### 2. Installation
+```bash
+git clone https://github.com/anant9934/avsar-pahse-01.git
+cd avsar-pahse-01
+npm install
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 3. Environment Configuration
+Copy `.env.example` to `.env.local`:
+```bash
+cp .env.example .env.local
+```
+Configure your environment variables as needed:
+```ini
+NODE_ENV=development
+PORT=3000
+SESSION_SECRET=avsar_development_session_secret_key_minimum_32_characters_long_12345
+AI_TATHASTU_CLIENT_ID=avsar-dev-client
+AI_TATHASTU_CLIENT_SECRET=avsar-dev-secret
+AI_TATHASTU_ISSUER_URL=https://auth.aitathastu.org
+# DATABASE_URL=postgres://user:password@localhost:5432/avsar
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Running the Development Server
+```bash
+npm run dev
+```
+Navigate to [http://localhost:3000](http://localhost:3000) to access Avsar.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🧪 Testing & Quality Assurance
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Avsar maintains a comprehensive test suite covering unit calculations, security boundaries, and full end-to-end user journeys:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+# Run all 64 automated test suites
+npm test
+
+# Run code style and ESLint verification
+npm run lint
+
+# Run TypeScript type-checking
+npx tsc --noEmit
+
+# Compile production build
+npm run build
+```
+
+### Test Coverage Highlights
+- ✅ **Integration Journeys**: Authentication, job discovery, private resume upload, application submission, duplicate prevention, and admin metrics.
+- ✅ **Deterministic Matching**: Exact skill overlap scoring, graduation year eligibility gating, and experience bracket evaluation.
+- ✅ **Security Mitigations**: Magic bytes file upload validation, BOLA prevention, timing attack resistance, and rate limiting.
+
+---
+
+## 🗄️ Database Migration (PostgreSQL)
+
+To migrate from the local file repository to a production PostgreSQL database:
+
+```bash
+# Run dry-run validation (checks schema, parses data/db.json, verifies constraints)
+node scripts/migrate-to-postgres.mjs --dry-run
+
+# Execute live migration with active database
+DATABASE_URL="postgres://user:password@localhost:5432/avsar" node scripts/migrate-to-postgres.mjs
+```
+
+---
+
+## 📄 License & Attribution
+
+Designed and engineered for **AI Tathastu**.  
+Authored by **Anant Kumar** ([@anant9934](https://github.com/anant9934)).  
+All rights reserved.
