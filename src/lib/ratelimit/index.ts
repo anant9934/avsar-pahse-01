@@ -32,18 +32,19 @@ export async function checkRateLimit(
  */
 export async function enforceRateLimit(
   request: Request | { headers: Headers; url: string },
-  customPolicy?: RateLimitConfig
+  customPolicy?: RateLimitConfig,
+  identifierOverride?: string
 ): Promise<Response | null> {
   // Allow bypassing rate limits during local automated unit testing if explicitly disabled
   if (process.env.DISABLE_RATE_LIMITING === "true") {
     return null;
   }
 
-  const clientIp = resolveClientIp(request);
+  const identifier = identifierOverride || resolveClientIp(request);
   const url = new URL(request.url);
   const policy = customPolicy || getPolicyForPathname(url.pathname);
 
-  const result = await getRateLimiter().check(clientIp, policy);
+  const result = await getRateLimiter().check(identifier, policy);
 
   if (!result.allowed) {
     return Response.json(
