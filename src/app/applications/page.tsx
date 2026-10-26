@@ -74,7 +74,11 @@ export default function MyApplicationsPage() {
 
         <div className="px-4 pt-3 flex flex-col gap-3.5">
           {/* Status Filter Tabs (Horizontal Scroll) */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4 select-none">
+          <div
+            className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4 select-none"
+            role="region"
+            aria-label="Application status filters"
+          >
             {tabs.map((tab) => {
               const active = activeTab === tab.id;
               return (
@@ -82,7 +86,8 @@ export default function MyApplicationsPage() {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                  aria-pressed={active}
+                  className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap min-h-[38px] transition-all ${
                     active
                       ? "bg-[#285C45] text-white shadow-xs"
                       : "bg-white border border-[#EAE7DF] text-[#55564F] hover:bg-[#F6F4EE]"
@@ -94,61 +99,87 @@ export default function MyApplicationsPage() {
             })}
           </div>
 
-          {/* Applications List */}
-          <div className="flex flex-col gap-3 mt-1">
-            {filteredApps.map((app) => (
-              <div
-                key={app.id}
-                className="card-surface p-4 flex items-center justify-between gap-3 bg-white hover:border-[#D6D3C9] transition-all"
-              >
-                <div className="flex items-start gap-3 min-w-0 flex-1">
-                  <CompanyLogo
-                    name={app.job?.company || "Company"}
-                    logoKey={app.job?.companyLogoKey}
-                    size="md"
-                    className="shrink-0"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-sm font-bold text-[#242720] leading-snug truncate">
-                      {app.job?.title || "Role"}
-                    </h3>
-                    <p className="text-xs text-[#77786F] mt-0.5 truncate">
-                      {app.job?.company} · {app.appliedDateFormatted}
-                    </p>
-
-                    {/* Status Badge */}
-                    <div className="mt-2">
-                      <span
-                        className={`text-[11px] font-bold px-2.5 py-0.5 rounded-md inline-block ${getStatusBadgeClass(
-                          app.status
-                        )}`}
-                      >
-                        {app.status}
-                      </span>
+          {/* Applications List or Skeletons */}
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1" aria-busy="true">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="card-surface p-4 bg-white flex items-center justify-between gap-3 min-h-[92px]"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl skeleton-shimmer" />
+                    <div className="flex flex-col gap-2">
+                      <div className="w-32 h-4 rounded-md skeleton-shimmer" />
+                      <div className="w-24 h-3 rounded-md skeleton-shimmer" />
                     </div>
                   </div>
+                  <div className="w-16 h-6 rounded-md skeleton-shimmer" />
                 </div>
-
-                <Link
-                  href={`/jobs/${app.jobId}`}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-[#9E9F96] hover:text-[#242720] hover:bg-[#F4F1EA] transition-colors shrink-0"
-                  aria-label="View application detail"
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1">
+              {filteredApps.map((app) => (
+                <div
+                  key={app.id}
+                  className="card-surface p-4 flex items-center justify-between gap-3 bg-white hover:border-[#D6D3C9] transition-all"
                 >
-                  <ChevronRight className="w-5 h-5" />
-                </Link>
-              </div>
-            ))}
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                    <CompanyLogo
+                      name={app.job?.company || "Company"}
+                      logoKey={app.job?.companyLogoKey}
+                      size="md"
+                      className="shrink-0"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-sm font-bold text-[#242720] leading-snug truncate">
+                        {app.job?.title || "Role"}
+                      </h3>
+                      <p className="text-xs text-[#77786F] mt-0.5 truncate">
+                        {app.job?.company} · {app.appliedDateFormatted}
+                      </p>
 
-            {filteredApps.length === 0 && !loading && (
-              <div className="text-center py-12 px-4 card-surface bg-white mt-4">
-                <FileCheck className="w-8 h-8 text-[#9E9F96] mx-auto mb-2" />
-                <p className="text-sm font-semibold text-[#242720]">No applications found</p>
-                <p className="text-xs text-[#77786F] mt-1">
-                  You don&apos;t have any applications matching the &quot;{activeTab}&quot; filter.
-                </p>
-              </div>
-            )}
-          </div>
+                      {/* Status Badge */}
+                      <div className="mt-2">
+                        <span
+                          className={`text-[11px] font-bold px-2.5 py-0.5 rounded-md inline-block ${getStatusBadgeClass(
+                            app.status
+                          )}`}
+                        >
+                          {app.status}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Link
+                    href={`/jobs/${app.jobId}`}
+                    className="w-11 h-11 rounded-full flex items-center justify-center text-[#9E9F96] hover:text-[#242720] hover:bg-[#F4F1EA] transition-colors shrink-0"
+                    aria-label={`View details for ${app.job?.title || "application"}`}
+                  >
+                    <ChevronRight className="w-5 h-5" aria-hidden="true" />
+                  </Link>
+                </div>
+              ))}
+
+              {filteredApps.length === 0 && !loading && (
+                <div className="text-center py-12 px-4 card-surface bg-white mt-4 col-span-full">
+                  <FileCheck className="w-8 h-8 text-[#9E9F96] mx-auto mb-2" aria-hidden="true" />
+                  <p className="text-sm font-semibold text-[#242720]">No applications found</p>
+                  <p className="text-xs text-[#77786F] mt-1">
+                    You don&apos;t have any applications matching the &quot;{activeTab}&quot; filter.
+                  </p>
+                  <Link
+                    href="/explore"
+                    className="inline-flex items-center gap-1.5 mt-4 px-5 py-2.5 bg-[#285C45] hover:bg-[#1E4735] text-white rounded-full text-xs font-semibold min-h-[44px] transition-colors"
+                  >
+                    Explore Open Opportunities
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </MobileShell>
