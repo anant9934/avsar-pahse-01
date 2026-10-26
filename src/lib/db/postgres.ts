@@ -131,11 +131,17 @@ export function getPgPool(): Pool {
     sslConfig = { rejectUnauthorized: false };
   }
 
+  const statementTimeout = parseInt(process.env.DB_STATEMENT_TIMEOUT_MS || "3000", 10);
+  const queryTimeout = parseInt(process.env.DB_QUERY_TIMEOUT_MS || "5000", 10);
+  const poolMax = parseInt(process.env.DB_POOL_MAX || (isNeon ? "10" : "20"), 10);
+
   globalPool = new PgPool({
     connectionString: databaseUrl,
-    max: parseInt(process.env.DB_POOL_MAX || "20", 10),
+    max: poolMax,
     idleTimeoutMillis: parseInt(process.env.DB_POOL_IDLE_TIMEOUT_MS || "30000", 10),
     connectionTimeoutMillis: parseInt(process.env.DB_POOL_CONNECTION_TIMEOUT_MS || "5000", 10),
+    statement_timeout: statementTimeout,
+    query_timeout: queryTimeout,
     ssl: sslConfig,
   });
 
@@ -147,6 +153,56 @@ export function getPgPool(): Pool {
 }
 
 /**
+ * Determine whether a database error is transient (safe to retry)
+ */
+export function isTransientDatabaseError(err: unknown): boolean {
+  if (!err) return false;
+  const msg = err instanceof Error ? err.message.toLowerCase() : String(err).toLowerCase();
+  const code = typeof err === "object" && err !== null && "code" in err ? String((err as { code: unknown }).code) : "";
+
+  return (
+    code === "57P01" || // admin_shutdown
+    code === "57P02" || // crash_shutdown
+    code === "57P03" || // cannot_connect_now
+    code === "08000" || // connection_exception
+    code === "08003" || // connection_does_not_exist
+    code === "08006" || // connection_failure
+    code === "ECONNRESET" ||
+    code === "ETIMEDOUT" ||
+    code === "EPIPE" ||
+    msg.includes("connection terminated") ||
+    msg.includes("socket closed") ||
+    msg.includes("server closed the connection") ||
+    msg.includes("connection timeout")
+  );
+}
+
+/**
+ * Execute a database operation with exponential backoff and jitter for transient errors
+ */
+export async function executeWithRetry<T>(
+  operation: () => Promise<T>,
+  maxRetries = 2,
+  baseDelayMs = 50
+): Promise<T> {
+  let attempt = 0;
+  while (true) {
+    try {
+      return await operation();
+    } catch (err) {
+      attempt++;
+      if (attempt > maxRetries || !isTransientDatabaseError(err)) {
+        throw err;
+      }
+      const jitter = Math.random() * 25;
+      const delay = Math.min(baseDelayMs * Math.pow(2, attempt - 1) + jitter, 1000);
+      console.warn(`[PostgreSQL Transient Retry] Attempt ${attempt}/${maxRetries} after ${delay.toFixed(0)}ms:`, err instanceof Error ? err.message : String(err));
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
+/**
  * Execute a parameterized query with bounded timeout and safe error handling
  */
 export async function query<R extends QueryResultRow = QueryResultRow>(
@@ -154,15 +210,25 @@ export async function query<R extends QueryResultRow = QueryResultRow>(
   params?: unknown[]
 ): Promise<QueryResult<R>> {
   const pool = getPgPool();
-  try {
-    return await pool.query<R>(text, params);
-  } catch (err) {
-    console.error("[PostgreSQL Query Error]:", {
-      query: text.slice(0, 100),
-      error: err instanceof Error ? err.message : String(err),
-    });
-    throw new DatabaseUnavailableError("Database query execution failed.", err);
+  const isSelect = text.trim().toUpperCase().startsWith("SELECT");
+
+  const runQuery = async () => {
+    try {
+      return await pool.query<R>(text, params);
+    } catch (err) {
+      console.error("[PostgreSQL Query Error]:", {
+        query: text.slice(0, 100),
+        error: err instanceof Error ? err.message : String(err),
+      });
+      throw new DatabaseUnavailableError("Database query execution failed.", err);
+    }
+  };
+
+  // Automatically retry read-only queries on transient network drops
+  if (isSelect) {
+    return await executeWithRetry(runQuery, 2, 50);
   }
+  return await runQuery();
 }
 
 /**
