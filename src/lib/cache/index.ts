@@ -62,3 +62,4 @@ export * from "./types.ts";
 export * from "./key-generator.ts";
 export * from "./memory-cache.ts";
 export * from "./redis-provider.ts";
+export * from "./http-cache.ts";
