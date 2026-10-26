@@ -69,7 +69,7 @@ function recordLatency(route, durationMs, isSuccess) {
   if (!isSuccess) entry.errors++;
 }
 
-async function executeJourney(userId) {
+async function executeJourney() {
   const roll = Math.random();
 
   try {
@@ -113,7 +113,7 @@ async function executeJourney(userId) {
       // 401 Unauthorized is expected for unauthenticated client, not a server error
       recordLatency("GET /api/jobs/saved", duration, res.status === 200 || res.status === 401);
     }
-  } catch (err) {
+  } catch {
     recordLatency("NETWORK_ERROR", 0, false);
   }
 }
