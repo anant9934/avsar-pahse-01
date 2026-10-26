@@ -6,6 +6,7 @@ import { Search, SlidersHorizontal, ChevronDown, Bookmark, X, Check } from "luci
 import { MobileShell } from "@/components/layout/MobileShell";
 import { MobileHeader } from "@/components/navigation/MobileHeader";
 import { JobCard } from "@/components/jobs/JobCard";
+import { useDebounce } from "@/hooks";
 import type { Job } from "@/types";
 
 export default function ExplorePage() {
@@ -13,6 +14,7 @@ export default function ExplorePage() {
   const [savedJobIds, setSavedJobIds] = useState<string[]>([]);
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedQuery = useDebounce(searchQuery, 350);
   const [sortOption, setSortOption] = useState<"recommended" | "latest">("recommended");
   const [loading, setLoading] = useState(true);
   const [totalOpportunities, setTotalOpportunities] = useState(0);
@@ -57,7 +59,7 @@ export default function ExplorePage() {
       setLoading(true);
       try {
         const queryParams = new URLSearchParams();
-        if (searchQuery.trim()) queryParams.set("q", searchQuery.trim());
+        if (debouncedQuery.trim()) queryParams.set("q", debouncedQuery.trim());
         if (activeFilter.toLowerCase() !== "all") queryParams.set("filter", activeFilter.toLowerCase());
         queryParams.set("sort", sortOption);
         queryParams.set("page", "1");
@@ -83,9 +85,8 @@ export default function ExplorePage() {
       }
     }
 
-    const timer = setTimeout(loadJobs, 150);
-    return () => clearTimeout(timer);
-  }, [activeFilter, searchQuery, sortOption]);
+    loadJobs();
+  }, [activeFilter, debouncedQuery, sortOption]);
 
   const handleLoadMore = async () => {
     if (!hasMore || loadingMore) return;
