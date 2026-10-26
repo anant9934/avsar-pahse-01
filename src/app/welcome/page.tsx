@@ -35,32 +35,32 @@ export default function WelcomePage() {
           <div className="absolute -top-4 -right-2 w-40 h-40 rounded-full bg-[#F3EFE6] filter blur-lg -z-0" />
 
           {/* Floating Category Pills with Ribbon Effect */}
-          <div className="absolute -top-1 right-2 z-20 transform rotate-[-4deg] animate-pulse">
-            <span className="font-serif italic text-xs tracking-wider text-[#77786F] bg-white/80 backdrop-blur-sm border border-[#E8E6DF] px-3 py-1 rounded-full shadow-2xs">
+          <div className="absolute top-2 right-4 z-20 transform rotate-[-4deg]">
+            <span className="font-serif italic text-xs tracking-wider text-[#77786F] bg-white/90 backdrop-blur-sm border border-[#E8E6DF] px-3 py-1 rounded-full shadow-2xs">
               Internships
             </span>
           </div>
 
-          <div className="absolute top-16 -left-2 z-20 transform rotate-[6deg]">
-            <span className="font-serif italic text-xs tracking-wider text-[#77786F] bg-white/80 backdrop-blur-sm border border-[#E8E6DF] px-3 py-1 rounded-full shadow-2xs">
+          <div className="absolute top-16 left-2 z-20 transform rotate-[6deg]">
+            <span className="font-serif italic text-xs tracking-wider text-[#77786F] bg-white/90 backdrop-blur-sm border border-[#E8E6DF] px-3 py-1 rounded-full shadow-2xs">
               Jobs
             </span>
           </div>
 
-          <div className="absolute top-36 right-0 z-20 transform rotate-[3deg]">
-            <span className="font-serif italic text-xs tracking-wider text-[#77786F] bg-white/80 backdrop-blur-sm border border-[#E8E6DF] px-3 py-1 rounded-full shadow-2xs">
+          <div className="absolute top-36 right-2 z-20 transform rotate-[3deg]">
+            <span className="font-serif italic text-xs tracking-wider text-[#77786F] bg-white/90 backdrop-blur-sm border border-[#E8E6DF] px-3 py-1 rounded-full shadow-2xs">
               Growth
             </span>
           </div>
 
-          <div className="absolute bottom-20 -left-1 z-20 transform rotate-[-5deg]">
-            <span className="font-serif italic text-xs tracking-wider text-[#77786F] bg-white/80 backdrop-blur-sm border border-[#E8E6DF] px-3 py-1 rounded-full shadow-2xs">
+          <div className="absolute bottom-20 left-2 z-20 transform rotate-[-5deg]">
+            <span className="font-serif italic text-xs tracking-wider text-[#77786F] bg-white/90 backdrop-blur-sm border border-[#E8E6DF] px-3 py-1 rounded-full shadow-2xs">
               Career
             </span>
           </div>
 
           <div className="absolute bottom-4 right-4 z-20 transform rotate-[8deg]">
-            <span className="font-serif italic text-xs tracking-wider text-[#77786F] bg-white/80 backdrop-blur-sm border border-[#E8E6DF] px-3 py-1 rounded-full shadow-2xs">
+            <span className="font-serif italic text-xs tracking-wider text-[#77786F] bg-white/90 backdrop-blur-sm border border-[#E8E6DF] px-3 py-1 rounded-full shadow-2xs">
               Opportunities
             </span>
           </div>
@@ -71,6 +71,7 @@ export default function WelcomePage() {
               src="/images/hero-student.jpg"
               alt="Avsar Career Opportunities Student"
               fill
+              sizes="(max-width: 768px) 100vw, 320px"
               className="object-cover object-top"
               priority
             />
