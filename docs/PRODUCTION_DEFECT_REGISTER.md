@@ -146,3 +146,60 @@
 - **Regression Test:** Visual and automated form state validation.
 - **Acceptance Criteria:**
   - Form fields reflect the authenticated candidate's data without hardcoded seed strings.
+
+---
+
+### `DEFECT-SERVERLESS-01`: Ephemeral Local Storage Fallback in Production Causes Document Loss
+- **Severity:** P0 (Critical)
+- **Category:** Data Durability & Serverless Reliability
+- **Affected File:** `src/lib/storage/index.ts`
+- **Workflow:** Candidate resume upload in serverless container environment.
+- **Root Cause:**
+  When cloud object storage environment variables (`STORAGE_BUCKET`) were omitted in production, the factory silently fell back to `LocalStorageProvider`, writing files to the container's ephemeral filesystem, resulting in permanent file loss upon lambda termination.
+- **Resolution:**
+  Enforced strict check: in production (`NODE_ENV=production`), `getStorageProvider()` rejects ephemeral local storage with an informative configuration error unless explicitly overridden with `ALLOW_EPHEMERAL_LOCAL_STORAGE=true`.
+- **Regression Test:** `test/vercel-deployment.test.mjs` (Test 2)
+- **Status:** **RESOLVED** (`0c2fb24`)
+
+---
+
+### `DEFECT-API-03`: Missing Authenticated Resume Deletion Endpoint with Cloud Object Cleanup
+- **Severity:** P1 (High)
+- **Category:** API Completeness & Storage Lifecycle Management
+- **Affected File:** `src/app/api/resumes/[id]/route.ts`
+- **Workflow:** Candidate managing or removing outdated resumes from profile.
+- **Root Cause:**
+  `src/app/api/resumes/[id]/route.ts` only implemented `GET`. There was no `DELETE` method, making it impossible for candidates to delete uploaded documents and creating stranded S3 storage costs.
+- **Resolution:**
+  Implemented authenticated `DELETE` handler with candidate ownership enforcement, horizontal privilege escalation defense, durable object storage deletion (`storage.delete`), local file cleanup, and database record removal.
+- **Regression Test:** `test/api.test.mjs` & `test/vercel-deployment.test.mjs`
+- **Status:** **RESOLVED** (`045d066`)
+
+---
+
+### `DEFECT-DEPLOY-01`: Static Redirect URI Misconfiguration on Vercel Environments
+- **Severity:** P1 (High)
+- **Category:** Authentication & Domain Configuration
+- **Affected File:** `src/lib/auth/aitathastu.ts`
+- **Workflow:** User authentication via AI Tathastu SSO on deployed Vercel previews and production domains.
+- **Root Cause:**
+  `AUTH_CONFIG.redirectUri` was statically initialized to `http://localhost:3000/...` at module load time when `AVSAR_AUTH_REDIRECT_URI` was omitted, breaking OAuth on preview and production URLs.
+- **Resolution:**
+  Implemented dynamic base URL resolution with a getter that inspects `NEXT_PUBLIC_APP_URL`, `VERCEL_PROJECT_PRODUCTION_URL`, and `VERCEL_URL` dynamically.
+- **Regression Test:** `test/vercel-deployment.test.mjs` (Test 1)
+- **Status:** **RESOLVED** (`78886bb`)
+
+---
+
+### `DEFECT-SEC-04`: Missing Production Security Headers and Server Framework Fingerprinting
+- **Severity:** P2 (Medium)
+- **Category:** Application Security & Hardening
+- **Affected File:** `next.config.ts`
+- **Workflow:** Global HTTP response headers across all website routes.
+- **Root Cause:**
+  Next.js default configuration emitted the `X-Powered-By: Next.js` header and lacked defense-in-depth security headers (`X-Frame-Options`, `X-Content-Type-Options`, `HSTS`, `Permissions-Policy`).
+- **Resolution:**
+  Configured `poweredByHeader: false`, enabled `compress: true`, and injected strict security headers on all routes (`/(.*)`).
+- **Regression Test:** `test/vercel-deployment.test.mjs` (Test 5)
+- **Status:** **RESOLVED** (`2701c2d`)
+
