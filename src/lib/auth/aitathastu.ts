@@ -49,8 +49,8 @@ export function validateAuthConfig(): {
   if (!process.env.AI_TATHASTU_CLIENT_SECRET) {
     warnings.push("AI_TATHASTU_CLIENT_SECRET is missing.");
   }
-  if (!process.env.AVSAR_SESSION_SECRET) {
-    warnings.push("AVSAR_SESSION_SECRET is not configured (required for tamper-proof session cookies).");
+  if (!process.env.AVSAR_SESSION_SECRET && !process.env.SESSION_SECRET) {
+    warnings.push("AVSAR_SESSION_SECRET or SESSION_SECRET is not configured (required for tamper-proof session cookies).");
   }
   if (!process.env.AVSAR_ADMIN_SECRET && isProd) {
     warnings.push("AVSAR_ADMIN_SECRET is not set in production. Administrative operations will be disabled.");
@@ -59,7 +59,7 @@ export function validateAuthConfig(): {
   const isProductionReady =
     Boolean(process.env.AI_TATHASTU_CLIENT_ID) &&
     Boolean(process.env.AI_TATHASTU_CLIENT_SECRET) &&
-    Boolean(process.env.AVSAR_SESSION_SECRET) &&
+    Boolean(process.env.AVSAR_SESSION_SECRET || process.env.SESSION_SECRET) &&
     Boolean(process.env.AVSAR_ADMIN_SECRET);
 
   return {

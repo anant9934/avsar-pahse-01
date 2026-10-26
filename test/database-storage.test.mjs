@@ -7,6 +7,7 @@ import { newDb } from "pg-mem";
 import {
   validateDocumentMagicBytes,
   LocalStorageProvider,
+  S3StorageProvider,
 } from "../src/lib/storage/index.ts";
 import { DatabaseConfigurationError } from "../src/lib/db/postgres.ts";
 import {
@@ -398,3 +399,38 @@ test("Phase 6.8: Production database configuration failure safety", () => {
     else delete process.env.DATABASE_URL;
   }
 });
+
+test("Phase 6.9: S3 storage provider fail-safe configuration guard when bucket is missing", () => {
+  const origBucket = process.env.STORAGE_BUCKET;
+  const origS3Bucket = process.env.S3_BUCKET;
+  try {
+    delete process.env.STORAGE_BUCKET;
+    delete process.env.S3_BUCKET;
+
+    assert.throws(
+      () => {
+        new S3StorageProvider();
+      },
+      /STORAGE_BUCKET or S3_BUCKET environment variable is required/,
+      "S3 provider must fail immediately if bucket is undefined"
+    );
+  } finally {
+    if (origBucket) process.env.STORAGE_BUCKET = origBucket;
+    if (origS3Bucket) process.env.S3_BUCKET = origS3Bucket;
+  }
+});
+
+test("Phase 6.10: Health check endpoint returns valid service diagnostics without leaking secrets", async () => {
+  const res = await fetch("http://localhost:3000/api/health");
+  assert.strictEqual(res.status, 200, "Health check must return HTTP 200");
+  const data = await res.json();
+  assert.strictEqual(data.status, "ok");
+  assert.ok(data.uptimeSeconds >= 0);
+  assert.ok(data.services.database);
+  assert.ok(data.services.storage);
+  assert.ok(data.services.auth);
+  // Ensure no sensitive credentials leaked
+  assert.strictEqual(data.services.auth.clientSecret, undefined);
+  assert.strictEqual(data.services.auth.sessionSecret, undefined);
+});
+

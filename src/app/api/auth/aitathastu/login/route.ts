@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const demo = searchParams.get("demo");
   const provider = searchParams.get("provider") as "google" | "email" | null;
-  const rawReturnTo = searchParams.get("return_to");
+  const rawReturnTo = searchParams.get("return_to") || searchParams.get("returnTo");
 
   // Strict same-origin relative path validation
   const returnTo = sanitizeReturnTo(rawReturnTo, "/home");
