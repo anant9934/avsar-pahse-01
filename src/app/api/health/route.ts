@@ -3,6 +3,8 @@ import { checkDatabaseHealth, isPostgresConfigured } from "@/lib/db/postgres";
 import { getStorageProvider } from "@/lib/storage";
 import { validateAuthConfig } from "@/lib/auth/aitathastu";
 import { db } from "@/lib/db";
+import { getAllMetricSnapshots } from "@/lib/telemetry";
+import { getCacheStats } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -100,6 +102,10 @@ export async function GET() {
           issuer: authAudit.configSummary.issuer,
           clientId: authAudit.configSummary.clientId,
         },
+      },
+      telemetry: {
+        metrics: getAllMetricSnapshots(),
+        cache: getCacheStats(),
       },
     },
     {
