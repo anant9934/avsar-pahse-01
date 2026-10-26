@@ -4,7 +4,14 @@ import { calculateJobMatch } from "@/lib/matching";
 import { checkAdminAuth } from "@/lib/auth/admin";
 import { getAuthenticatedCandidate } from "@/lib/auth/session";
 import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
-import { cacheGetOrSet, cachePurgeTag, generateCacheKey } from "@/lib/cache";
+import {
+  cacheGetOrSet,
+  cachePurgeTag,
+  generateCacheKey,
+  generateETag,
+  isNotModified,
+  buildCacheControlHeader,
+} from "@/lib/cache";
 import {
   extractOrCreateTraceContext,
   createTimer,
@@ -147,17 +154,32 @@ export async function GET(request: NextRequest) {
     const serverTiming = formatServerTiming(timer.getSpans());
     if (serverTiming) headers.set("Server-Timing", serverTiming);
 
-    return NextResponse.json(
-      {
-        total,
-        page: limit > 0 ? page : 1,
-        limit: limit > 0 ? limit : total,
-        totalPages,
-        hasMore,
-        jobs: paginatedJobs,
-      },
-      { headers }
-    );
+    const responsePayload = {
+      total,
+      page: limit > 0 ? page : 1,
+      limit: limit > 0 ? limit : total,
+      totalPages,
+      hasMore,
+      jobs: paginatedJobs,
+    };
+
+    const etag = generateETag(responsePayload);
+    headers.set("ETag", etag);
+
+    if (auth) {
+      headers.set("Cache-Control", buildCacheControlHeader({ isPrivate: true }));
+    } else {
+      headers.set(
+        "Cache-Control",
+        buildCacheControlHeader({ maxAge: 10, sMaxAge: 60, staleWhileRevalidate: 120 })
+      );
+    }
+
+    if (isNotModified(request.headers, etag)) {
+      return new NextResponse(null, { status: 304, headers });
+    }
+
+    return NextResponse.json(responsePayload, { headers });
   } catch (err: unknown) {
     if (err instanceof DatabaseUnavailableError || err instanceof DatabaseConfigurationError) {
       return NextResponse.json(
