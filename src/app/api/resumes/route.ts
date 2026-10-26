@@ -4,6 +4,7 @@ import { getStorageProvider, validateDocumentMagicBytes } from "@/lib/storage";
 import { getAuthenticatedCandidate } from "@/lib/auth/session";
 import path from "node:path";
 import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
+import { enforceRateLimit } from "@/lib/ratelimit";
 
 export async function GET(request: NextRequest) {
   try {
@@ -32,6 +33,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const rateLimitResponse = await enforceRateLimit(request);
+    if (rateLimitResponse) return rateLimitResponse as NextResponse;
+
     const auth = getAuthenticatedCandidate(request);
     if (!auth) {
       return NextResponse.json(
