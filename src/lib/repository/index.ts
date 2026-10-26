@@ -217,11 +217,20 @@ export class LocalAuditRepository implements AuditRepository {
 // =============================================================================
 
 function assertDatabaseConfiguredIfProduction() {
-  if (process.env.NODE_ENV === "production" && !isPostgresConfigured()) {
+  const isProduction = process.env.NODE_ENV === "production";
+  if (isProduction && !isPostgresConfigured()) {
     throw new DatabaseConfigurationError(
-      "DATABASE_URL is not configured in production environment. Application refuses to start with ephemeral storage."
+      "CRITICAL: DATABASE_URL is not configured in production environment. Application refuses to start with ephemeral local storage."
     );
   }
+}
+
+/**
+ * Identify the active repository persistence provider
+ */
+export function getActiveRepositoryProvider(): "postgres" | "local_file" {
+  assertDatabaseConfiguredIfProduction();
+  return isPostgresConfigured() ? "postgres" : "local_file";
 }
 
 export function getCandidateRepository(): CandidateRepository {
