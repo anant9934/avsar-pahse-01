@@ -13,6 +13,7 @@ export class MemoryQueue {
   private deadLetterQueue: QueueJob[] = [];
   private completedCount = 0;
   private failedCount = 0;
+  private delayedCount = 0;
 
   private concurrency: number;
   private maxRetries: number;
@@ -99,8 +100,10 @@ export class MemoryQueue {
 
       if (job.attempts < job.maxAttempts) {
         // Exponential backoff delay before re-enqueuing
+        this.delayedCount++;
         const delay = this.backoffMs * Math.pow(2, job.attempts - 1);
         setTimeout(() => {
+          this.delayedCount--;
           job.status = "pending";
           this.pending.push(job);
           this.triggerWorkerLoop();
@@ -123,7 +126,7 @@ export class MemoryQueue {
    */
   async drain(timeoutMs = 5000): Promise<void> {
     const start = Date.now();
-    while (this.pending.length > 0 || this.processing.size > 0) {
+    while (this.pending.length > 0 || this.processing.size > 0 || this.delayedCount > 0) {
       if (Date.now() - start > timeoutMs) {
         throw new Error(`Queue drain timed out after ${timeoutMs}ms`);
       }
@@ -151,5 +154,6 @@ export class MemoryQueue {
     this.deadLetterQueue = [];
     this.completedCount = 0;
     this.failedCount = 0;
+    this.delayedCount = 0;
   }
 }
