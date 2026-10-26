@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { Bookmark, Sparkles } from "lucide-react";
 import { CompanyLogo } from "@/components/brand/CompanyLogo";
+import { useOptimisticBookmark } from "@/hooks";
 import type { Job } from "@/types";
 
 interface JobCardProps {
@@ -20,29 +21,16 @@ export function JobCard({
   initialSaved = false,
   onToggleSave,
 }: JobCardProps) {
-  const [isSaved, setIsSaved] = useState(initialSaved);
-  const [isSaving, setIsSaving] = useState(false);
+  const { isSaved, isPending, toggleBookmark } = useOptimisticBookmark({
+    jobId: job.id,
+    initialSaved,
+    onSuccess: (saved) => onToggleSave?.(job.id, saved),
+  });
 
-  const handleBookmark = async (e: React.MouseEvent) => {
+  const handleBookmark = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsSaving(true);
-    const nextSaved = !isSaved;
-    setIsSaved(nextSaved);
-
-    try {
-      await fetch("/api/jobs/saved", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jobId: job.id }),
-      });
-      onToggleSave?.(job.id, nextSaved);
-    } catch (err) {
-      console.error("Failed to toggle save", err);
-      setIsSaved(!nextSaved);
-    } finally {
-      setIsSaving(false);
-    }
+    toggleBookmark();
   };
 
   const displayMatch = matchScore ?? (job as unknown as { matchScore?: number }).matchScore;
@@ -140,7 +128,7 @@ export function JobCard({
         <button
           type="button"
           onClick={handleBookmark}
-          disabled={isSaving}
+          disabled={isPending}
           aria-label={isSaved ? `Remove ${job.title} from saved` : `Save ${job.title}`}
           aria-pressed={isSaved}
           className={`w-11 h-11 -mr-2 -my-2 flex items-center justify-center rounded-full hover:bg-[#F2EFE9] transition-colors ${
