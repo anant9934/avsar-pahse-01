@@ -28,7 +28,7 @@ export function isNotModified(
   if (!ifNoneMatch) return false;
 
   // Clean quotes or W/ prefix for normalized comparison
-  const clean = (val: string) => val.replace(/^W\//, "").replace(/"/g, "").trim();
+  const clean = (val: string) => val.trim().replace(/^W\//i, "").replace(/"/g, "").trim();
   const target = clean(etag);
 
   if (ifNoneMatch.trim() === "*") return true;
