@@ -10,8 +10,9 @@ export async function GET() {
 
   // 1. Check Database Health
   let databaseStatus: {
-    status: "healthy" | "degraded" | "unhealthy";
-    type: "postgres" | "local_file";
+    status: "healthy" | "unhealthy";
+    type: "neon" | "postgres" | "local_file" | "unconfigured";
+    isPooled?: boolean;
     latencyMs?: number;
     recordCount?: number;
     error?: string;
@@ -20,22 +21,26 @@ export async function GET() {
   if (isPostgresConfigured()) {
     const pgHealth = await checkDatabaseHealth();
     databaseStatus = {
-      status: pgHealth.status === "healthy" ? "healthy" : "unhealthy",
-      type: "postgres",
+      status: pgHealth.status,
+      type: pgHealth.provider || "postgres",
+      isPooled: pgHealth.isPooled,
       latencyMs: pgHealth.latencyMs,
       error: pgHealth.error,
+    };
+  } else if (process.env.NODE_ENV === "production") {
+    // Production strictly requires Neon PostgreSQL; ephemeral file storage is rejected
+    databaseStatus = {
+      status: "unhealthy",
+      type: "unconfigured",
+      error: "CRITICAL: DATABASE_URL is required in production environment. Ephemeral local storage is prohibited.",
     };
   } else {
     try {
       const jobCount = db.getJobs().length;
       databaseStatus = {
-        status: process.env.NODE_ENV === "production" ? "degraded" : "healthy",
+        status: "healthy",
         type: "local_file",
         recordCount: jobCount,
-        error:
-          process.env.NODE_ENV === "production"
-            ? "Running on file repository fallback. DATABASE_URL required for multi-instance production."
-            : undefined,
       };
     } catch (err) {
       databaseStatus = {
