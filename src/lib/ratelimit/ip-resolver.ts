@@ -1,5 +1,3 @@
-import type { NextRequest } from "next/server";
-
 // Standard IPv4 and IPv6 validation patterns
 const IPV4_REGEX = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 const IPV6_REGEX = /^(?:[a-fA-F0-9]{1,4}:){7}[a-fA-F0-9]{1,4}$|^::1$|^::$|^(?:[a-fA-F0-9]{1,4}:)*::(?:[a-fA-F0-9]{1,4}:)*[a-fA-F0-9]{1,4}$/;
@@ -17,7 +15,7 @@ export function isValidIp(ip: string): boolean {
  * Prioritizes platform-authenticated edge headers (Vercel, Cloudflare) that
  * cannot be spoofed by HTTP clients, followed by defensive X-Forwarded-For parsing.
  */
-export function resolveClientIp(request: Request | NextRequest | { headers: Headers }): string {
+export function resolveClientIp(request: Request | { headers: Headers }): string {
   const headers = request.headers;
 
   // 1. Edge-authenticated platform headers (tamper-proof on Vercel & Cloudflare)
@@ -43,7 +41,7 @@ export function resolveClientIp(request: Request | NextRequest | { headers: Head
   const xForwardedFor = headers.get("x-forwarded-for");
   if (xForwardedFor) {
     // If multiple IPs are chained (client, proxy1, proxy2), inspect elements
-    const ips = xForwardedFor.split(",").map((s) => s.trim());
+    const ips = xForwardedFor.split(",").map((s: string) => s.trim());
     for (const ip of ips) {
       if (isValidIp(ip)) {
         return ip;
