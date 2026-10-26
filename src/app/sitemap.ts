@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
-import { resolveDeploymentBaseUrl } from "@/lib/auth/aitathastu";
-import { getJobRepository } from "@/lib/repository";
+import { resolveDeploymentBaseUrl } from "../lib/auth/aitathastu.ts";
+import { getJobRepository } from "../lib/repository/index.ts";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = resolveDeploymentBaseUrl();
