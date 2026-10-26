@@ -7,18 +7,7 @@ import {
   logAdminAction,
 } from "@/lib/auth/admin";
 import { signSessionPayload } from "@/lib/auth/session";
-import { timingSafeEqual } from "node:crypto";
-
-function safeCompare(a: string, b: string): boolean {
-  try {
-    const bufA = Buffer.from(a, "utf-8");
-    const bufB = Buffer.from(b, "utf-8");
-    if (bufA.length !== bufB.length) return false;
-    return timingSafeEqual(bufA, bufB);
-  } catch {
-    return false;
-  }
-}
+import { safeCompare } from "@/lib/auth/timing-safe";
 
 export async function GET(request: NextRequest) {
   const auth = checkAdminAuth(request);
