@@ -1,5 +1,22 @@
-import { timingSafeEqual } from "node:crypto";
 import { SESSION_COOKIE_NAME, verifySessionToken, type RequestWithCookies } from "./session.ts";
+import { safeCompare } from "./timing-safe.ts";
+import { checkAdminRateLimit, resetAdminRateLimits } from "./rate-limiter.ts";
+import {
+  logAdminAction,
+  getAdminAuditLogs,
+  clearAdminAuditLogs,
+  type AdminAuditEntry,
+} from "./audit-logger.ts";
+
+export {
+  safeCompare,
+  checkAdminRateLimit,
+  resetAdminRateLimits,
+  logAdminAction,
+  getAdminAuditLogs,
+  clearAdminAuditLogs,
+};
+export type { AdminAuditEntry };
 
 export const ADMIN_COOKIE_NAME = "avsar_admin_session";
 export const ADMIN_KEY_HEADER = "x-admin-key";
@@ -19,80 +36,6 @@ export function getAdminSecret(): string | null {
   }
   // Local development / testing default
   return "avsar_admin_secret_2025";
-}
-
-export interface AdminAuditEntry {
-  timestamp: string;
-  action: string;
-  ip?: string;
-  success: boolean;
-  details?: string;
-}
-
-// In-memory audit log for sensitive administrative operations
-const auditLogs: AdminAuditEntry[] = [];
-
-export function logAdminAction(entry: Omit<AdminAuditEntry, "timestamp">) {
-  auditLogs.unshift({
-    ...entry,
-    timestamp: new Date().toISOString(),
-  });
-  if (auditLogs.length > 500) {
-    auditLogs.pop();
-  }
-}
-
-export function getAdminAuditLogs(): AdminAuditEntry[] {
-  return [...auditLogs];
-}
-
-// In-memory rate limiting for admin login attempts
-interface RateLimitTracker {
-  attempts: number;
-  firstAttemptAt: number;
-}
-const loginAttempts = new Map<string, RateLimitTracker>();
-
-export function checkAdminRateLimit(ipOrKey: string): { allowed: boolean; retryAfterSeconds?: number } {
-  const now = Date.now();
-  const windowMs = 5 * 60 * 1000; // 5 minutes
-  const maxAttempts = 10;
-
-  const tracker = loginAttempts.get(ipOrKey);
-  if (!tracker) {
-    loginAttempts.set(ipOrKey, { attempts: 1, firstAttemptAt: now });
-    return { allowed: true };
-  }
-
-  if (now - tracker.firstAttemptAt > windowMs) {
-    // Reset window
-    loginAttempts.set(ipOrKey, { attempts: 1, firstAttemptAt: now });
-    return { allowed: true };
-  }
-
-  tracker.attempts += 1;
-  if (tracker.attempts > maxAttempts) {
-    const retryAfter = Math.ceil((tracker.firstAttemptAt + windowMs - now) / 1000);
-    return { allowed: false, retryAfterSeconds: Math.max(1, retryAfter) };
-  }
-
-  return { allowed: true };
-}
-
-/**
- * Timing-safe string comparison
- */
-function safeCompare(a: string, b: string): boolean {
-  try {
-    const bufA = Buffer.from(a, "utf-8");
-    const bufB = Buffer.from(b, "utf-8");
-    if (bufA.length !== bufB.length) {
-      return false;
-    }
-    return timingSafeEqual(bufA, bufB);
-  } catch {
-    return false;
-  }
 }
 
 /**
