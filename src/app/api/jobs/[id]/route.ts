@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getJobRepository, getCandidateRepository, getSavedJobRepository } from "@/lib/repository";
 import { calculateJobMatch } from "@/lib/matching";
+import { getAuthenticatedCandidate } from "@/lib/auth/session";
 import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
 
 export async function GET(
@@ -18,8 +19,16 @@ export async function GET(
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
 
-    const candidate = (await candRepo.getById("cand_rohan_sharma_001")) || (await candRepo.listAll())[0];
-    const match = candidate ? calculateJobMatch(candidate, job) : { overallScore: 75, ratingLabel: "Good Match", eligibility: { isEligible: true, reason: "" } };
+    const auth = getAuthenticatedCandidate(request);
+    const candidateId = auth?.candidateId || "cand_rohan_sharma_001";
+    const candidate =
+      (await candRepo.getById(candidateId)) ||
+      (await candRepo.getById("cand_rohan_sharma_001")) ||
+      (await candRepo.listAll())[0];
+
+    const match = candidate
+      ? calculateJobMatch(candidate, job)
+      : { overallScore: 75, ratingLabel: "Good Match", eligibility: { isEligible: true, reason: "" } };
     const isSaved = candidate ? await savedRepo.isSaved(candidate.id, job.id) : false;
 
     return NextResponse.json({
