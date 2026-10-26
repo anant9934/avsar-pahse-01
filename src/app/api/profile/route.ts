@@ -53,20 +53,28 @@ export async function PATCH(request: NextRequest) {
     const candRepo = getCandidateRepository();
     const updated = await candRepo.update(auth.candidateId, updates);
 
-    // Asynchronously dispatch background match score recalculation and audit event
-    await enqueueJob("matching_recalc", {
-      candidateId: auth.candidateId,
-      trigger: "profile_update",
-    });
+    // Asynchronously dispatch background match score recalculation (low priority) and audit event (high priority)
+    await enqueueJob(
+      "matching_recalc",
+      {
+        candidateId: auth.candidateId,
+        trigger: "profile_update",
+      },
+      { priority: "low" }
+    );
 
-    await enqueueJob("audit_log", {
-      actorType: "candidate",
-      actorId: auth.candidateId,
-      action: "update_profile",
-      resourceType: "candidate",
-      resourceId: auth.candidateId,
-      metadata: { fieldsUpdated: Object.keys(updates) },
-    });
+    await enqueueJob(
+      "audit_log",
+      {
+        actorType: "candidate",
+        actorId: auth.candidateId,
+        action: "update_profile",
+        resourceType: "candidate",
+        resourceId: auth.candidateId,
+        metadata: { fieldsUpdated: Object.keys(updates) },
+      },
+      { priority: "high" }
+    );
 
     return NextResponse.json({ success: true, candidate: updated });
   } catch (err: unknown) {
