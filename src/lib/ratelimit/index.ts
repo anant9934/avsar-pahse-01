@@ -1,4 +1,3 @@
-import { NextResponse, type NextRequest } from "next/server";
 import { SlidingWindowLimiter, MemoryRateLimitStore } from "./sliding-window.ts";
 import { resolveClientIp } from "./ip-resolver.ts";
 import { getPolicyForPathname } from "./policies.ts";
@@ -32,9 +31,9 @@ export async function checkRateLimit(
  * Returns a 429 Too Many Requests response with RFC-compliant headers if exceeded.
  */
 export async function enforceRateLimit(
-  request: Request | NextRequest,
+  request: Request | { headers: Headers; url: string },
   customPolicy?: RateLimitConfig
-): Promise<NextResponse | null> {
+): Promise<Response | null> {
   // Allow bypassing rate limits during local automated unit testing if explicitly disabled
   if (process.env.DISABLE_RATE_LIMITING === "true") {
     return null;
@@ -47,7 +46,7 @@ export async function enforceRateLimit(
   const result = await getRateLimiter().check(clientIp, policy);
 
   if (!result.allowed) {
-    return NextResponse.json(
+    return Response.json(
       {
         error: "Too many requests. Please slow down and try again shortly.",
         retryAfter: result.retryAfterSeconds,
