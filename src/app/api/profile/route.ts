@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCandidateRepository } from "@/lib/repository";
 import { getAuthenticatedCandidate } from "@/lib/auth/session";
 import { DatabaseUnavailableError, DatabaseConfigurationError } from "@/lib/db/postgres";
+import { enqueueJob } from "@/lib/queue";
 
 export async function GET(request: NextRequest) {
   try {
@@ -51,6 +52,21 @@ export async function PATCH(request: NextRequest) {
 
     const candRepo = getCandidateRepository();
     const updated = await candRepo.update(auth.candidateId, updates);
+
+    // Asynchronously dispatch background match score recalculation and audit event
+    await enqueueJob("matching_recalc", {
+      candidateId: auth.candidateId,
+      trigger: "profile_update",
+    });
+
+    await enqueueJob("audit_log", {
+      actorType: "candidate",
+      actorId: auth.candidateId,
+      action: "update_profile",
+      resourceType: "candidate",
+      resourceId: auth.candidateId,
+      metadata: { fieldsUpdated: Object.keys(updates) },
+    });
 
     return NextResponse.json({ success: true, candidate: updated });
   } catch (err: unknown) {
