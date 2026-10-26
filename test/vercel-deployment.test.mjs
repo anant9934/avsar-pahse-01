@@ -5,7 +5,7 @@ import { getStorageProvider, setStorageProvider, isEphemeralStorageAllowed } fro
 import robots from "../src/app/robots.ts";
 import sitemap from "../src/app/sitemap.ts";
 
-test("Vercel Deployment 1: Dynamic OAuth Redirect URI Resolution", (t) => {
+test("Vercel Deployment 1: Dynamic OAuth Redirect URI Resolution", () => {
   const origEnv = { ...process.env };
 
   try {
@@ -42,7 +42,7 @@ test("Vercel Deployment 1: Dynamic OAuth Redirect URI Resolution", (t) => {
   }
 });
 
-test("Vercel Deployment 2: Ephemeral Local Storage Rejection in Production", (t) => {
+test("Vercel Deployment 2: Ephemeral Local Storage Rejection in Production", () => {
   const origEnv = { ...process.env };
 
   try {
@@ -72,7 +72,7 @@ test("Vercel Deployment 2: Ephemeral Local Storage Rejection in Production", (t)
   }
 });
 
-test("Vercel Deployment 3: Dynamic Robots Metadata Rules", (t) => {
+test("Vercel Deployment 3: Dynamic Robots Metadata Rules", () => {
   const origEnv = { ...process.env };
   try {
     process.env.NEXT_PUBLIC_APP_URL = "https://avsar.ai";
@@ -92,7 +92,7 @@ test("Vercel Deployment 3: Dynamic Robots Metadata Rules", (t) => {
   }
 });
 
-test("Vercel Deployment 4: Dynamic Sitemap URL Indexation", async (t) => {
+test("Vercel Deployment 4: Dynamic Sitemap URL Indexation", async () => {
   const origEnv = { ...process.env };
   try {
     process.env.NEXT_PUBLIC_APP_URL = "https://avsar.ai";
@@ -111,7 +111,7 @@ test("Vercel Deployment 4: Dynamic Sitemap URL Indexation", async (t) => {
   }
 });
 
-test("Vercel Deployment 5: Next.js Configuration Security Headers & Compression", async (t) => {
+test("Vercel Deployment 5: Next.js Configuration Security Headers & Compression", async () => {
   const { default: nextConfig } = await import("../next.config.ts");
 
   assert.equal(nextConfig.poweredByHeader, false);
@@ -132,7 +132,7 @@ test("Vercel Deployment 5: Next.js Configuration Security Headers & Compression"
   assert.ok(headerMap["Permissions-Policy"].includes("camera=()"));
 });
 
-test("Vercel Deployment 6: Health Endpoint Route Configuration & Cache Directives", async (t) => {
+test("Vercel Deployment 6: Health Endpoint Route Configuration & Cache Directives", async () => {
   const fs = await import("node:fs");
   const path = await import("node:path");
   const content = fs.readFileSync(path.resolve("src/app/api/health/route.ts"), "utf8");
