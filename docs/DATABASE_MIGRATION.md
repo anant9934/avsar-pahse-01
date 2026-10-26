@@ -1,12 +1,15 @@
-# PostgreSQL Database Architecture & Production Migration Runbook
+# Neon Serverless PostgreSQL Migration Runbook & Architecture
 
 ## Overview
 
-Avsar features a production-grade dual persistence model:
-1. **PostgreSQL** (Primary Production Database): Uses connection pooling (`pg.Pool`), normalized relations, strategic B-tree indexes, and ACID transaction boundaries.
-2. **File Repository** (Local & Edge Fallback): High-performance JSON-backed repository (`data/db.json`) enabling zero-configuration offline development and serverless portability.
+Avsar features a robust production-grade persistence model:
+1. **Neon Serverless PostgreSQL** (Primary Production Database): Uses PgBouncer connection pooling (`-pooler.neon.tech`), normalized relations, strategic B-tree indexes, ACID transaction boundaries, and zero-copy branching.
+2. **File Repository** (Local Development Fallback): Development-only JSON-backed repository (`data/db.json`) enabling zero-configuration offline development. Prohibited in production.
 
-This document details the schema architecture, connection pooling specifications, idempotent migration CLI, and the step-by-step production runbook.
+Related Documentation:
+- Complete Relational Schema: [`docs/DATABASE_SCHEMA.md`](file:///Users/quantum/Desktop/avsar/docs/DATABASE_SCHEMA.md)
+- Neon Console Setup & Operations: [`docs/NEON_SETUP.md`](file:///Users/quantum/Desktop/avsar/docs/NEON_SETUP.md)
+- DDL Schema Definition: [`src/lib/db/schema.sql`](file:///Users/quantum/Desktop/avsar/src/lib/db/schema.sql)
 
 ---
 
