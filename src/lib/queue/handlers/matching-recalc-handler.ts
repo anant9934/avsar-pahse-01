@@ -1,7 +1,7 @@
 import type { JobHandler } from "../types.ts";
-import { getCandidateRepository, getJobRepository } from "@/lib/repository";
-import { calculateJobMatch } from "@/lib/matching";
-import { cachePurgeTag } from "@/lib/cache";
+import { getCandidateRepository, getJobRepository } from "../../repository/index.ts";
+import { calculateJobMatch } from "../../matching.ts";
+import { cachePurgeTag } from "../../cache/index.ts";
 
 export interface MatchingRecalcJobPayload {
   candidateId: string;
