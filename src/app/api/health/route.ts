@@ -4,6 +4,9 @@ import { getStorageProvider } from "@/lib/storage";
 import { validateAuthConfig } from "@/lib/auth/aitathastu";
 import { db } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   const uptime = process.uptime();
   const timestamp = new Date().toISOString();
@@ -51,10 +54,11 @@ export async function GET() {
     }
   }
 
-  // 2. Check Storage Provider
+  // 2. Check Storage Provider Health
   let storageStatus: {
     provider: string;
     status: "healthy" | "unhealthy";
+    error?: string;
   };
   try {
     const storage = getStorageProvider();
@@ -62,10 +66,11 @@ export async function GET() {
       provider: storage.name,
       status: "healthy",
     };
-  } catch {
+  } catch (storageErr) {
     storageStatus = {
-      provider: process.env.STORAGE_PROVIDER || "unknown",
+      provider: process.env.STORAGE_PROVIDER || "unconfigured",
       status: "unhealthy",
+      error: storageErr instanceof Error ? storageErr.message : String(storageErr),
     };
   }
 
@@ -78,9 +83,14 @@ export async function GET() {
   return NextResponse.json(
     {
       status: isHealthy ? "ok" : "unhealthy",
-      environment: process.env.NODE_ENV || "development",
+      environment: process.env.VERCEL_ENV || process.env.NODE_ENV || "development",
       timestamp,
       uptimeSeconds: Math.floor(uptime),
+      deployment: {
+        platform: process.env.VERCEL ? "vercel" : "node",
+        region: process.env.VERCEL_REGION || null,
+        vercelEnv: process.env.VERCEL_ENV || null,
+      },
       services: {
         database: databaseStatus,
         storage: storageStatus,
@@ -92,6 +102,13 @@ export async function GET() {
         },
       },
     },
-    { status: statusCode }
+    {
+      status: statusCode,
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    }
   );
 }
