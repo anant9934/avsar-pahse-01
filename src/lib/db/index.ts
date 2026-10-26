@@ -75,18 +75,18 @@ function getInitialData(): DbSchema {
 }
 
 let memoryCache: DbSchema | null = null;
+let lastMtimeMs = 0;
 
 function ensureDb(): DbSchema {
-  if (memoryCache) return memoryCache;
-
   try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-
     if (fs.existsSync(DB_FILE)) {
+      const stat = fs.statSync(DB_FILE);
+      if (memoryCache && stat.mtimeMs <= lastMtimeMs) {
+        return memoryCache;
+      }
       const content = fs.readFileSync(DB_FILE, "utf-8");
       memoryCache = JSON.parse(content) as DbSchema;
+      lastMtimeMs = stat.mtimeMs;
 
       // Ensure multi-candidate data structures are present
       if (!memoryCache.candidates || !Array.isArray(memoryCache.candidates)) {
@@ -173,6 +173,11 @@ function saveDb(data: DbSchema): void {
 
     // 3. Atomic rename (POSIX atomic replacement)
     fs.renameSync(tmpFile, DB_FILE);
+    try {
+      lastMtimeMs = fs.statSync(DB_FILE).mtimeMs;
+    } catch {
+      // ignore
+    }
     memoryCache = data;
   } catch (err) {
     console.error("Failed to persist database file atomically", err);
