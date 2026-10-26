@@ -95,12 +95,25 @@ function MatchExplanationContent({
             />
           </div>
 
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-[#285C45] bg-[#EAF4EB] px-3 py-1 rounded-full font-semibold">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>{match.eligibility.isEligible ? "Fully Eligible to Apply" : "Prerequisites Met"}</span>
+          <div className="mt-3 flex items-center gap-1.5 text-xs px-3 py-1 rounded-full font-semibold">
+            {match.eligibility.isEligible ? (
+              <span className="text-[#285C45] bg-[#EAF4EB] px-3 py-1 rounded-full flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                Fully Eligible to Apply
+              </span>
+            ) : (
+              <span className="text-amber-800 bg-amber-100 border border-amber-300 px-3 py-1 rounded-full flex items-center gap-1.5">
+                <Info className="w-3.5 h-3.5" />
+                Eligibility Criteria Notice
+              </span>
+            )}
           </div>
 
-          <p className="text-xs text-[#77786F] mt-2 max-w-xs leading-relaxed">
+          <p className="text-xs font-medium text-[#242720] mt-2 max-w-xs leading-relaxed bg-[#FAF9F5] p-2.5 rounded-xl border border-[#EAE7DF]">
+            {match.eligibility.reason}
+          </p>
+
+          <p className="text-[11px] text-[#77786F] mt-1.5 max-w-xs leading-relaxed">
             Calculated using Avsar&apos;s deterministic multi-factor fit model against your verified AI Tathastu profile.
           </p>
         </div>
@@ -188,14 +201,24 @@ function MatchExplanationContent({
       </div>
 
       {/* Bottom CTA to Apply */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#ECEAE3] max-w-md mx-auto px-4 py-3">
-        <Link
-          href={`/jobs/${job.id}/apply`}
-          className="w-full bg-[#285C45] hover:bg-[#1E4735] text-white font-bold py-3.5 px-6 rounded-full flex items-center justify-center gap-2 text-sm shadow-sm transition-all group"
-        >
-          <span>Proceed to Application</span>
-          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-        </Link>
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#ECEAE3] max-w-md mx-auto px-4 py-3 safe-area-bottom">
+        {job.isExternalApplication ? (
+          <Link
+            href={`/jobs/${job.id}`}
+            className="w-full bg-[#285C45] hover:bg-[#1E4735] text-white font-bold py-3.5 px-6 rounded-full flex items-center justify-center gap-2 text-sm shadow-sm transition-all min-h-[44px]"
+          >
+            <span>View Job & External Link</span>
+            <ArrowRight className="w-4 h-4" aria-hidden="true" />
+          </Link>
+        ) : (
+          <Link
+            href={`/jobs/${job.id}/apply`}
+            className="w-full bg-[#285C45] hover:bg-[#1E4735] text-white font-bold py-3.5 px-6 rounded-full flex items-center justify-center gap-2 text-sm shadow-sm transition-all group min-h-[44px]"
+          >
+            <span>Proceed to Application</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+          </Link>
+        )}
       </div>
     </div>
   );
