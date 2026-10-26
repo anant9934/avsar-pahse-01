@@ -49,11 +49,29 @@
 | 34 | `74f0703` | `docs(schema): create comprehensive relational database schema documentation` | `docs/DATABASE_SCHEMA.md` | Document all 8 normalized tables, constraints, indexes, and relations | Schema documentation review |
 | 35 | `63d2fa3` | `docs(migration): document neon serverless migration runbook and verification procedures` | `docs/DATABASE_MIGRATION.md` | Align migration runbook with Neon serverless connection and pooling | Migration runbook verification |
 
+| 36 | `0c2fb24` | `fix(storage): reject ephemeral local file storage in production environments` | `src/lib/storage/index.ts` | Enforce durable cloud object storage in production, blocking silent file loss | `node --test test/vercel-deployment.test.mjs` |
+| 37 | `045d066` | `feat(api): implement authenticated resume deletion with storage cleanup and ownership verification` | `src/app/api/resumes/[id]/route.ts` | Implement DELETE endpoint with ownership checks, cloud object deletion, and repo cleanup | `npx tsc --noEmit` & integration tests |
+| 38 | `78886bb` | `feat(auth): resolve oauth callback uri dynamically from vercel and custom domain environment variables` | `src/lib/auth/aitathastu.ts` | Dynamically resolve redirect URI from VERCEL_URL, NEXT_PUBLIC_APP_URL, and AVSAR_AUTH_REDIRECT_URI | `node --test test/vercel-deployment.test.mjs` |
+| 39 | `70d3e13` | `feat(health): add vercel serverless deployment telemetry and force-dynamic cache control` | `src/app/api/health/route.ts` | Add force-dynamic export, Vercel deployment telemetry, and cache-control headers | `npx tsc --noEmit` & `npm run build` |
+| 40 | `2701c2d` | `feat(config): add security headers and disable powered-by header in next config` | `next.config.ts` | Configure X-Frame-Options, X-Content-Type-Options, HSTS, Permissions-Policy, and suppress powered-by | `npm run build` |
+| 41 | `dcfdd5b` | `feat(ui): add branded 404 not found page with design tokens and recovery actions` | `src/app/not-found.tsx` | Create branded 404 page with warm ivory, forest green tokens, and recovery navigation | `npm run build` |
+| 42 | `d59905d` | `feat(ui): add branded error boundary with retry capability and graceful recovery` | `src/app/error.tsx` | Create client error boundary with retry reset, error logging, and health link | `npm run build` |
+| 43 | `dad8609` | `feat(seo): add dynamic robots metadata for search indexation and route protection` | `src/app/robots.ts` | Generate dynamic robots.txt protecting private routes and advertising sitemap | `node --test test/vercel-deployment.test.mjs` |
+| 44 | `68beb85` | `feat(seo): add dynamic sitemap generation for public routes and job discovery` | `src/app/sitemap.ts` | Generate dynamic sitemap.xml with core pages and job discovery URLs | `node --test test/vercel-deployment.test.mjs` |
+| 45 | `e5c4254` | `ci(github): add automated ci workflow for tests, linting, typechecking, and build validation` | `.github/workflows/ci.yml` | Author GitHub Actions workflow testing on Node 20.x and 22.x | Workflow syntax review & git checks |
+| 46 | `9f481e9` | `fix(seo): use relative esm import path in robots metadata` | `src/app/robots.ts` | Use relative ESM path to allow dual compatibility with Next.js and Node native ESM test runner | `node --test test/vercel-deployment.test.mjs` |
+| 47 | `10df8bf` | `fix(seo): use relative esm import paths in dynamic sitemap generator` | `src/app/sitemap.ts` | Use relative ESM imports for auth and repository in dynamic sitemap | `node --test test/vercel-deployment.test.mjs` |
+| 48 | `3827ec1` | `test(deployment): add regression tests for vercel serverless configuration and security gates` | `test/vercel-deployment.test.mjs` | Add 6 automated tests for URL resolution, storage safety, robots, sitemap, security headers, and health | `node --test test/vercel-deployment.test.mjs` |
+| 49 | `654102f` | `docs(env): document vercel deployment environment variable taxonomy in example template` | `.env.example` | Detail Vercel Production vs Preview vs Development variable requirements and ephemeral flags | Documentation review |
+| 50 | `23a0c5d` | `docs(vercel): create complete production deployment and serverless operations guide` | `docs/VERCEL_DEPLOYMENT.md` | Author end-to-end Vercel runbook covering Neon pooling, env variables, smoke tests, and rollback | Documentation review |
+| 51 | `8507b4b` | `docs(defects): document phase 6 production mitigations and serverless hardening` | `docs/PRODUCTION_DEFECT_REGISTER.md` | Record resolutions for ephemeral storage risk, resume deletion endpoint, dynamic redirect URI, and security headers | Defect register verification |
+
 ---
 
 ## Ledger Summary
 
-- **Total Atomic Commits Recorded:** 35
+- **Total Atomic Commits Recorded:** 51
 - **One-File Atomicity Compliance:** 100% (each commit modifies exactly 1 tracked file)
 - **Author Identity:** Verified as `Anant Kumar <anant9934@users.noreply.github.com>` on every commit
 - **Verification Guarantee:** 100% of commits accompanied by green targeted automated unit/integration tests
+
