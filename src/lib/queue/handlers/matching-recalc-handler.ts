@@ -13,7 +13,7 @@ export interface MatchingRecalcJobPayload {
  * candidate-specific recommendation caches asynchronously.
  */
 export const matchingRecalcJobHandler: JobHandler<MatchingRecalcJobPayload> = async (job) => {
-  const { candidateId, trigger } = job.payload;
+  const { candidateId } = job.payload;
   const candRepo = getCandidateRepository();
   const jobRepo = getJobRepository();
 
