@@ -17,6 +17,7 @@ import type {
   JobFilterOptions,
 } from "./types.ts";
 import { db } from "../db/index.ts";
+import { indexJobs, searchJobs } from "../search/index.ts";
 import type { Application, Candidate, Job, Resume } from "../../types/index.ts";
 
 // =============================================================================
@@ -59,13 +60,23 @@ export class LocalJobRepository implements JobRepository {
 
     if (filter?.q) {
       const q = filter.q.toLowerCase();
-      jobs = jobs.filter((j) => {
-        const matchTitle = j.title.toLowerCase().includes(q);
-        const matchCompany = j.company.toLowerCase().includes(q);
-        const matchCategory = (j.category || j.department || "").toLowerCase().includes(q);
-        const matchLocation = j.location.toLowerCase().includes(q);
-        return matchTitle || matchCompany || matchCategory || matchLocation;
-      });
+      const allJobs = db.getJobs();
+      indexJobs(allJobs);
+      const searchResults = searchJobs(filter.q);
+      if (searchResults.length > 0) {
+        const scoreMap = new Map(searchResults.map((r) => [r.jobId, r.score]));
+        jobs = jobs
+          .filter((j) => scoreMap.has(j.id))
+          .sort((a, b) => (scoreMap.get(b.id) || 0) - (scoreMap.get(a.id) || 0));
+      } else {
+        jobs = jobs.filter((j) => {
+          const matchTitle = j.title.toLowerCase().includes(q);
+          const matchCompany = j.company.toLowerCase().includes(q);
+          const matchCategory = (j.category || j.department || "").toLowerCase().includes(q);
+          const matchLocation = j.location.toLowerCase().includes(q);
+          return matchTitle || matchCompany || matchCategory || matchLocation;
+        });
+      }
     }
 
     if (filter?.workArrangement && filter.workArrangement !== "all") {
