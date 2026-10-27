@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import {
   Smartphone,
   Monitor,
-  ShieldCheck,
   Home,
   Compass,
   Bookmark,
