@@ -46,7 +46,9 @@ test("Responsive Shell & Layout Verification", async (t) => {
     assert.match(content, /href="\/saved"/, "Desktop nav must link to /saved");
     assert.match(content, /href="\/applications"/, "Desktop nav must link to /applications");
     assert.match(content, /href="\/profile"/, "Desktop nav must link to /profile");
-    assert.match(content, /href="\/admin"/, "Desktop nav must link to /admin");
+
+    // Admin button must NEVER be exposed in public desktop navigation for security & privacy
+    assert.doesNotMatch(content, /Admin Portal/, "Desktop navigation must not expose Admin Portal for security and privacy");
 
     // BottomNav must be constrained to mobile screens
     assert.match(content, /className="md:hidden"/, "BottomNav must be wrapped in md:hidden to prevent desktop duplication");
@@ -70,8 +72,42 @@ test("Responsive Shell & Layout Verification", async (t) => {
     assert.match(content, /Get Started/, "Must include 'Get Started' action text");
     assert.match(content, /Sign In/, "Must include 'Sign In' action text");
 
+    // Production sections below the fold
+    assert.match(content, /id="how-it-works"/, "Must include how-it-works section");
+    assert.match(content, /id="for-employers"/, "Must include employer partnership section");
+    assert.match(content, /<footer/, "Must include production footer");
+
     // Mobile header hidden on desktop to avoid duplicate branding
     assert.match(content, /className="flex md:hidden items-center/, "Mobile header must hide on desktop");
+  });
+
+  await t.test("Home page provides responsive 2-column desktop dashboard with main feed and sidebar", () => {
+    const homePagePath = path.join(rootDir, "src/app/home/page.tsx");
+    const content = fs.readFileSync(homePagePath, "utf-8");
+
+    assert.match(content, /lg:grid-cols-12/, "Home page must use 12-column grid on desktop");
+    assert.match(content, /lg:col-span-8/, "Main feed must occupy 8 columns on desktop");
+    assert.match(content, /lg:col-span-4/, "Activity sidebar must occupy 4 columns on desktop");
+  });
+
+  await t.test("Explore, Saved, Applications, and Profile pages hide mobile header on desktop and show desktop banners", () => {
+    const exploreContent = fs.readFileSync(path.join(rootDir, "src/app/explore/page.tsx"), "utf-8");
+    const savedContent = fs.readFileSync(path.join(rootDir, "src/app/saved/page.tsx"), "utf-8");
+    const applicationsContent = fs.readFileSync(path.join(rootDir, "src/app/applications/page.tsx"), "utf-8");
+    const profileContent = fs.readFileSync(path.join(rootDir, "src/app/profile/page.tsx"), "utf-8");
+
+    assert.match(exploreContent, /className="md:hidden"/, "Explore must hide mobile header on desktop");
+    assert.match(exploreContent, /Explore Opportunities/, "Explore must provide desktop title banner");
+    assert.match(exploreContent, /lg:grid-cols-3/, "Explore must support 3-column cards on desktop");
+
+    assert.match(savedContent, /className="md:hidden"/, "Saved must hide mobile header on desktop");
+    assert.match(savedContent, /Saved Opportunities/, "Saved must provide desktop title banner");
+
+    assert.match(applicationsContent, /className="md:hidden"/, "Applications must hide mobile header on desktop");
+    assert.match(applicationsContent, /Application Tracker/, "Applications must provide desktop title banner");
+
+    assert.match(profileContent, /className="md:hidden"/, "Profile must hide mobile header on desktop");
+    assert.match(profileContent, /Candidate Profile/, "Profile must provide desktop title banner");
   });
 
   await t.test("Auth portal provides centered responsive desktop card layout", () => {
