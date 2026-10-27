@@ -155,23 +155,43 @@ export default function CandidateProfilePage() {
           </div>
         )}
 
-        {/* Mobile Header */}
-        <MobileHeader
-          title="My Profile"
-          showBack={true}
-          rightAction={
+        {/* Mobile Header (Hidden on desktop) */}
+        <div className="md:hidden">
+          <MobileHeader
+            title="My Profile"
+            showBack={true}
+            rightAction={
+              <Link
+                href="/api/auth/logout"
+                className="w-11 h-11 rounded-full flex items-center justify-center text-[#77786F] hover:text-[#D13636] hover:bg-[#F2EFE9] transition-colors"
+                title="Sign Out"
+                aria-label="Sign Out of Avsar"
+              >
+                <LogOut className="w-4 h-4" aria-hidden="true" />
+              </Link>
+            }
+          />
+        </div>
+
+        <div className="px-4 sm:px-6 pt-2 sm:pt-4 flex flex-col gap-4">
+          {/* Desktop Title Banner */}
+          <div className="hidden md:flex items-center justify-between pb-3 border-b border-[#ECEAE3]">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#242720] tracking-tight">
+                Candidate Profile
+              </h1>
+              <p className="text-xs sm:text-sm text-[#77786F]">
+                Manage your verified technical credentials, academic details, and career preferences.
+              </p>
+            </div>
             <Link
               href="/api/auth/logout"
-              className="w-11 h-11 rounded-full flex items-center justify-center text-[#77786F] hover:text-[#D13636] hover:bg-[#F2EFE9] transition-colors"
-              title="Sign Out"
-              aria-label="Sign Out of Avsar"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#ECEAE3] bg-white text-xs font-semibold text-[#D13636] hover:bg-[#FDF2F2] transition-colors shadow-2xs"
             >
-              <LogOut className="w-4 h-4" aria-hidden="true" />
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Sign Out</span>
             </Link>
-          }
-        />
-
-        <div className="px-5 pt-3 flex flex-col gap-4">
+          </div>
           {/* Candidate Profile Header Card */}
           <div className="flex flex-col items-center text-center pt-2 pb-1">
             <div className="relative w-20 h-20 rounded-full overflow-hidden border-3 border-white shadow-md mb-2.5">
